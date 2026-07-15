@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Your Order — Range Cloud</title>
+<meta name="description" content="Confirm your Range Cloud hosting plan and chat with our team about setup.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" href="logo.png">
+</head>
+<body class="page-enter">
+
+<div class="loading-bar" id="loadingBar"></div>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="checkIcon" viewBox="0 0 24 24">
+    <path d="M20 6 9 17l-5-5"/>
+  </symbol>
+</svg>
+
+<div id="starfield" aria-hidden="true">
+  <div class="nebula-layer" aria-hidden="true"></div>
+  <div class="planet-wrap" aria-hidden="true">
+    <svg class="planet-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="planetShade" cx="35%" cy="32%" r="75%">
+          <stop offset="0%" stop-color="#7fd8ff"/>
+          <stop offset="35%" stop-color="#2f7bff"/>
+          <stop offset="70%" stop-color="#15326e"/>
+          <stop offset="100%" stop-color="#050a1a"/>
+        </radialGradient>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00e0ff" stop-opacity="0.05"/>
+          <stop offset="18%" stop-color="#00e0ff" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#e9edf7" stop-opacity="0.75"/>
+          <stop offset="82%" stop-color="#2f5bff" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#2f5bff" stop-opacity="0.05"/>
+        </linearGradient>
+        <clipPath id="planetClip">
+          <circle cx="200" cy="200" r="95"/>
+        </clipPath>
+      </defs>
+      <g transform="rotate(-16 200 200)">
+        <path d="M 15,200 A 185,50 0 1,0 385,200 A 185,50 0 1,0 15,200 Z
+                 M 82,200 A 118,32 0 1,1 318,200 A 118,32 0 1,1 82,200 Z"
+              fill="url(#ringGrad)" fill-rule="evenodd" opacity="0.65"/>
+      </g>
+      <circle cx="200" cy="200" r="95" fill="url(#planetShade)"/>
+      <g class="planet-core" clip-path="url(#planetClip)">
+        <ellipse cx="150" cy="180" rx="120" ry="18" fill="#0a1e4d" opacity="0.35"/>
+        <ellipse cx="260" cy="230" rx="130" ry="14" fill="#0a1e4d" opacity="0.28"/>
+        <ellipse cx="190" cy="140" rx="100" ry="10" fill="#8fe6ff" opacity="0.18"/>
+        <ellipse cx="230" cy="270" rx="110" ry="12" fill="#8fe6ff" opacity="0.12"/>
+      </g>
+      <g transform="rotate(-16 200 200)">
+        <clipPath id="ringFrontClip">
+          <rect x="0" y="200" width="400" height="200"/>
+        </clipPath>
+        <path d="M 15,200 A 185,50 0 1,0 385,200 A 185,50 0 1,0 15,200 Z
+                 M 82,200 A 118,32 0 1,1 318,200 A 118,32 0 1,1 82,200 Z"
+              fill="url(#ringGrad)" fill-rule="evenodd" opacity="0.85"
+              clip-path="url(#ringFrontClip)"/>
+      </g>
+      <g class="moon-orbit">
+        <circle cx="350" cy="200" r="7" fill="#c9d6f5"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo" aria-label="Range Cloud home">
+      <img src="logo.png" alt="Range Cloud" class="logo-mark">
+      <span class="logo-text">Range Cloud</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html#features" data-page="index.html">Features</a>
+      <a href="plans.html" data-page="plans.html">Plans</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#support-section">Support</a>
+    </nav>
+
+    <div class="nav-right">
+      <a class="social-icon" href="https://discord.gg/Q9EFKmKFFb" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3c-.22.4-.43.86-.6 1.28a18.27 18.27 0 0 0-5.57 0A11.6 11.6 0 0 0 9.115 3a19.736 19.736 0 0 0-4.432 1.37C1.98 8.19 1.24 11.9 1.55 15.56a19.9 19.9 0 0 0 6.06 3.06c.49-.67.92-1.39 1.29-2.15-.7-.26-1.37-.59-2-.98.17-.12.33-.25.49-.38a14.1 14.1 0 0 0 12.24 0c.16.13.32.26.49.38-.63.39-1.3.72-2 .98.37.76.8 1.48 1.29 2.15a19.83 19.83 0 0 0 6.06-3.06c.36-4.24-.62-7.92-2.65-11.19ZM8.68 13.33c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Zm6.64 0c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Z"/></svg>
+      </a>
+      <a class="social-icon" href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Watch us on YouTube">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.6 15.5V8.5l6.4 3.5-6.4 3.5Z"/></svg>
+      </a>
+      <div class="nav-account">
+        <a href="auth.html" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="auth.html#signup" class="btn btn-primary btn-sm">Sign Up</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page-content">
+<div class="purchase-wrap" id="purchaseRoot">
+  <div class="purchase-grid">
+
+    <div class="purchase-heading">
+      <h1>Complete your order</h1>
+      <p>Confirm the plan below, tell us your Discord username, and our team will pick up setup with you here.</p>
+    </div>
+
+    <div id="purchaseGate"></div>
+
+    <div class="plan-card" id="purchaseSummary"></div>
+
+    <div class="purchase-form-card" id="purchaseFormSection">
+      <h3>Almost there</h3>
+      <p class="sub">We use your Discord username to reach you quickly if this chat goes quiet — no payment is collected on this page.</p>
+
+      <div class="form-msg" id="purchaseFormMsg"></div>
+
+      <form id="purchaseForm" novalidate>
+        <div class="field">
+          <label for="purchaseDiscord">Discord username</label>
+          <input type="text" id="purchaseDiscord" placeholder="yourname or yourname#1234" required>
+          <div class="field-hint">We'll use this to follow up if needed. Your account username is used to identify this order.</div>
+        </div>
+        <div class="field">
+          <label for="purchaseNotes">Anything we should know? (optional)</label>
+          <textarea id="purchaseNotes" placeholder="e.g. preferred modpack, region, or launch date" style="width:100%;min-height:90px;padding:12px;background:var(--panel-2);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--text);font-size:0.88rem;resize:vertical;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Submit Order Request</button>
+      </form>
+    </div>
+
+    <div class="chat-card" id="purchaseChatSection" style="display:none;">
+      <div class="chat-card-head">
+        <h3>Order conversation</h3>
+        <span class="role-badge user tag" id="chatOrderStatus">pending</span>
+      </div>
+      <div class="chat-thread" id="chatThread"></div>
+      <form class="chat-form" id="chatForm">
+        <input type="text" id="chatInput" placeholder="Type a message..." maxlength="1000" required>
+        <button type="submit" class="btn btn-primary btn-sm">Send</button>
+      </form>
+      <div class="form-msg" id="chatFormMsg"></div>
+      <div class="chat-note">This conversation is saved in this browser only. If you switch devices or browsers, sign in and open this order from your dashboard — messages sent from a different device by our team will only appear there once we reply from a connected system.</div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer page-content">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <a href="index.html" class="logo" style="margin-bottom:12px;">
+        <img src="logo.png" alt="Range Cloud" class="logo-mark">
+        <span class="logo-text">Range Cloud</span>
+      </a>
+      <p style="color:var(--muted);font-size:0.85rem;max-width:260px;">Premium game and application hosting on enterprise hardware.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="plans.html">All Plans</a></li>
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="auth.html">Sign In</a></li>
+        <li><a href="auth.html#signup">Sign Up</a></li>
+        <li><a href="auth.html#dashboard">Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="https://discord.gg/Q9EFKmKFFb" target="_blank" rel="noopener noreferrer">Discord</a></li>
+        <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Range Cloud. All rights reserved.</span>
+    <span>Optimised for Cloudflare Pages</span>
+  </div>
+</footer>
+
+<!-- ============ SUPPORT WIDGET ============ -->
+<button class="support-launcher" id="supportLauncher" aria-label="Open live support">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6 2 11c0 2.4 1 4.6 2.7 6.2-.2 1.4-.8 2.7-1.7 3.8 1.6 0 3.4-.5 4.9-1.4 1.3.5 2.7.8 4.1.8 5.5 0 10-4 10-9s-4.5-9-10-9Z"/></svg>
+  <span class="ping" id="supportPing"></span>
+</button>
+
+<div class="support-panel" id="supportPanel" role="dialog" aria-label="Live support">
+  <div class="support-header">
+    <div class="title">
+      <span class="dot"></span>
+      <div>
+        <h4>Range Cloud Support</h4>
+        <div class="sub">Typically replies within minutes</div>
+      </div>
+    </div>
+    <button class="support-close" id="supportClose" aria-label="Close support panel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="support-mode-tabs">
+    <button id="modeTicket" class="active" type="button">Open a Ticket</button>
+    <button id="modeAdmin" type="button" style="display:none;">Support Queue</button>
+    <button id="modePurchases" type="button" style="display:none;">Purchases</button>
+  </div>
+  <div class="support-body">
+    <div id="bodyTicket" class="support-mode-body">
+      <h5>Tell us what's going on</h5>
+      <form id="ticketForm">
+        <textarea id="ticketMessage" placeholder="Describe your issue or question in detail..." required></textarea>
+        <input type="email" id="ticketEmail" placeholder="Contact email (optional)">
+        <button type="submit" class="btn btn-primary btn-block btn-sm">Submit Ticket</button>
+        <div class="form-msg" id="ticketFeedback"></div>
+      </form>
+    </div>
+    <div id="bodyAdmin" class="support-mode-body" style="display:none;">
+      <h5>Open tickets</h5>
+      <div class="ticket-list" id="adminQueueList"></div>
+    </div>
+    <div id="bodyPurchases" class="support-mode-body" style="display:none;">
+      <h5>Purchase requests</h5>
+      <div class="ticket-list" id="adminPurchasesList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
