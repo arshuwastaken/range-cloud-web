@@ -10,7 +10,9 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body>
+<body class="page-enter">
+
+<div class="loading-bar" id="loadingBar"></div>
 
 <svg style="display:none" aria-hidden="true">
   <symbol id="checkIcon" viewBox="0 0 24 24">
@@ -94,7 +96,7 @@
     </nav>
 
     <div class="nav-right">
-      <a class="social-icon" href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+      <a class="social-icon" href="https://discord.gg/Q9EFKmKFFb" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3c-.22.4-.43.86-.6 1.28a18.27 18.27 0 0 0-5.57 0A11.6 11.6 0 0 0 9.115 3a19.736 19.736 0 0 0-4.432 1.37C1.98 8.19 1.24 11.9 1.55 15.56a19.9 19.9 0 0 0 6.06 3.06c.49-.67.92-1.39 1.29-2.15-.7-.26-1.37-.59-2-.98.17-.12.33-.25.49-.38a14.1 14.1 0 0 0 12.24 0c.16.13.32.26.49.38-.63.39-1.3.72-2 .98.37.76.8 1.48 1.29 2.15a19.83 19.83 0 0 0 6.06-3.06c.36-4.24-.62-7.92-2.65-11.19ZM8.68 13.33c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Zm6.64 0c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Z"/></svg>
       </a>
       <a class="social-icon" href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Watch us on YouTube">
@@ -143,7 +145,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 100%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=2GB+PLAN&price=85&ram=2GB&storage=25GB&cpu=100%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card featured">
           <div class="plan-name">4GB PLAN</div>
@@ -155,7 +157,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 150%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=4GB+PLAN&price=170&ram=4GB&storage=50GB&cpu=150%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">6GB PLAN</div>
@@ -167,7 +169,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=6GB+PLAN&price=255&ram=6GB&storage=75GB&cpu=200%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">8GB PLAN</div>
@@ -179,7 +181,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 250%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=8GB+PLAN&price=340&ram=8GB&storage=100GB&cpu=250%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">10GB PLAN</div>
@@ -191,7 +193,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 300%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=10GB+PLAN&price=425&ram=10GB&storage=125GB&cpu=300%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">12GB PLAN</div>
@@ -203,7 +205,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 350%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=12GB+PLAN&price=510&ram=12GB&storage=150GB&cpu=350%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">14GB PLAN</div>
@@ -215,7 +217,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 400%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=14GB+PLAN&price=595&ram=14GB&storage=175GB&cpu=400%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">16GB PLAN</div>
@@ -227,7 +229,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 450%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Intel+Gold+Hosting&plan=16GB+PLAN&price=680&ram=16GB&storage=200GB&cpu=450%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         </div>
       </div>
@@ -248,7 +250,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 100%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=STARTER&price=160&ram=2GB&storage=25GB&cpu=100%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">BASIC</div>
@@ -260,7 +262,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 150%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=BASIC&price=320&ram=4GB&storage=50GB&cpu=150%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card featured">
           <div class="plan-name">PRO</div>
@@ -272,7 +274,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=PRO&price=480&ram=6GB&storage=75GB&cpu=200%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ADVANCED</div>
@@ -284,7 +286,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 250%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=ADVANCED&price=640&ram=8GB&storage=100GB&cpu=250%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ELITE</div>
@@ -296,7 +298,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 300%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=ELITE&price=800&ram=10GB&storage=125GB&cpu=300%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">TITAN</div>
@@ -308,7 +310,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 350%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=TITAN&price=960&ram=12GB&storage=150GB&cpu=350%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">SUPREME</div>
@@ -320,7 +322,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 400%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=SUPREME&price=1120&ram=14GB&storage=175GB&cpu=400%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">BEAST</div>
@@ -332,7 +334,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 450%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=BEAST&price=1280&ram=16GB&storage=200GB&cpu=450%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ENTERPRISE</div>
@@ -344,7 +346,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 600%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=ENTERPRISE&price=1920&ram=24GB&storage=300GB&cpu=600%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ULTRA ENTERPRISE</div>
@@ -356,7 +358,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 800%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=ULTRA+ENTERPRISE&price=2560&ram=32GB&storage=400GB&cpu=800%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">INFINITY</div>
@@ -368,7 +370,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 1200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=AMD+Epyc+Hosting&plan=INFINITY&price=3840&ram=48GB&storage=600GB&cpu=1200%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         </div>
       </div>
@@ -389,7 +391,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 100%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=STARTER&price=349&ram=2GB&storage=25GB&cpu=100%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">BASIC</div>
@@ -401,7 +403,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 150%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=BASIC&price=499&ram=4GB&storage=50GB&cpu=150%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">PRO</div>
@@ -413,7 +415,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=PRO&price=649&ram=6GB&storage=75GB&cpu=200%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card featured">
           <div class="plan-name">ADVANCED</div>
@@ -425,7 +427,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 250%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=ADVANCED&price=799&ram=8GB&storage=100GB&cpu=250%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ELITE</div>
@@ -437,7 +439,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 300%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=ELITE&price=949&ram=10GB&storage=125GB&cpu=300%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">TITAN</div>
@@ -449,7 +451,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 350%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=TITAN&price=1099&ram=12GB&storage=150GB&cpu=350%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">SUPREME</div>
@@ -461,7 +463,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 450%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=SUPREME&price=1399&ram=16GB&storage=200GB&cpu=450%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ENTERPRISE</div>
@@ -473,7 +475,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 600%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=ENTERPRISE&price=1999&ram=24GB&storage=300GB&cpu=600%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ULTRA ENTERPRISE</div>
@@ -485,7 +487,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 800%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=ULTRA+ENTERPRISE&price=2599&ram=32GB&storage=400GB&cpu=800%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">INFINITY</div>
@@ -497,7 +499,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 1200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=INFINITY&price=3799&ram=48GB&storage=600GB&cpu=1200%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">OMEGA</div>
@@ -509,7 +511,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 1600%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+7-7700X+Hosting&plan=OMEGA&price=4999&ram=64GB&storage=800GB&cpu=1600%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         </div>
       </div>
@@ -530,7 +532,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 100%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=STARTER&price=480&ram=2GB&storage=25GB&cpu=100%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">BASIC</div>
@@ -542,7 +544,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 150%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=BASIC&price=660&ram=4GB&storage=50GB&cpu=150%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">PRO</div>
@@ -554,7 +556,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=PRO&price=840&ram=6GB&storage=75GB&cpu=200%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ADVANCED</div>
@@ -566,7 +568,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 250%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=ADVANCED&price=1020&ram=8GB&storage=100GB&cpu=250%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card featured">
           <div class="plan-name">ELITE</div>
@@ -578,7 +580,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 300%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=ELITE&price=1200&ram=10GB&storage=125GB&cpu=300%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">TITAN</div>
@@ -590,7 +592,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 350%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=TITAN&price=1380&ram=12GB&storage=150GB&cpu=350%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">SUPREME</div>
@@ -602,7 +604,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 450%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=SUPREME&price=1740&ram=16GB&storage=200GB&cpu=450%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ENTERPRISE</div>
@@ -614,7 +616,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 600%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=ENTERPRISE&price=2460&ram=24GB&storage=300GB&cpu=600%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ULTRA ENTERPRISE</div>
@@ -626,7 +628,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 800%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=ULTRA+ENTERPRISE&price=3180&ram=32GB&storage=400GB&cpu=800%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">INFINITY</div>
@@ -638,7 +640,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 1200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=INFINITY&price=4620&ram=48GB&storage=600GB&cpu=1200%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">OMEGA</div>
@@ -650,7 +652,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 1600%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Ryzen+9-9950X+Hosting&plan=OMEGA&price=6060&ram=64GB&storage=800GB&cpu=1600%25&location=India+Location" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         </div>
       </div>
@@ -671,7 +673,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 50%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Discord+Bot+Hosting&plan=STARTER&price=49&ram=512MB&storage=5GB&cpu=50%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card featured">
           <div class="plan-name">BASIC</div>
@@ -683,7 +685,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 100%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Discord+Bot+Hosting&plan=BASIC&price=99&ram=1GB&storage=10GB&cpu=100%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">PRO</div>
@@ -695,7 +697,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 150%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Discord+Bot+Hosting&plan=PRO&price=199&ram=2GB&storage=20GB&cpu=150%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ADVANCED</div>
@@ -707,7 +709,7 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 200%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Discord+Bot+Hosting&plan=ADVANCED&price=299&ram=4GB&storage=40GB&cpu=200%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         <div class="plan-card">
           <div class="plan-name">ELITE</div>
@@ -719,10 +721,11 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> CPU: 300%</li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><use href="#checkIcon"/></svg> DDoS Protection Included</li>
           </ul>
-          <a href="auth.html#signup" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
+          <a href="purchase.html?category=Discord+Bot+Hosting&plan=ELITE&price=499&ram=8GB&storage=80GB&cpu=300%25&location=" class="btn btn-glow-solid btn-block">Deploy This Plan</a>
         </div>
         </div>
-      </div>  </div>
+      </div>
+  </div>
 </div>
 
 <!-- ============ FOOTER ============ -->
@@ -754,7 +757,7 @@
     <div class="footer-col">
       <h4>Community</h4>
       <ul>
-        <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer">Discord</a></li>
+        <li><a href="https://discord.gg/Q9EFKmKFFb" target="_blank" rel="noopener noreferrer">Discord</a></li>
         <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a></li>
       </ul>
     </div>
@@ -786,7 +789,8 @@
   </div>
   <div class="support-mode-tabs">
     <button id="modeTicket" class="active" type="button">Open a Ticket</button>
-    <button id="modeAdmin" type="button" style="display:none;">Admin Queue</button>
+    <button id="modeAdmin" type="button" style="display:none;">Support Queue</button>
+    <button id="modePurchases" type="button" style="display:none;">Purchases</button>
   </div>
   <div class="support-body">
     <div id="bodyTicket" class="support-mode-body">
@@ -801,6 +805,10 @@
     <div id="bodyAdmin" class="support-mode-body" style="display:none;">
       <h5>Open tickets</h5>
       <div class="ticket-list" id="adminQueueList"></div>
+    </div>
+    <div id="bodyPurchases" class="support-mode-body" style="display:none;">
+      <h5>Purchase requests</h5>
+      <div class="ticket-list" id="adminPurchasesList"></div>
     </div>
   </div>
 </div>
