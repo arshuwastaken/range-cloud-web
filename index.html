@@ -10,7 +10,9 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" type="image/png" href="logo.png">
 </head>
-<body>
+<body class="page-enter">
+
+<div class="loading-bar" id="loadingBar"></div>
 
 <div id="starfield" aria-hidden="true">
   <div class="nebula-layer" aria-hidden="true"></div>
@@ -88,7 +90,7 @@
     </nav>
 
     <div class="nav-right">
-      <a class="social-icon" href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+      <a class="social-icon" href="https://discord.gg/Q9EFKmKFFb" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3c-.22.4-.43.86-.6 1.28a18.27 18.27 0 0 0-5.57 0A11.6 11.6 0 0 0 9.115 3a19.736 19.736 0 0 0-4.432 1.37C1.98 8.19 1.24 11.9 1.55 15.56a19.9 19.9 0 0 0 6.06 3.06c.49-.67.92-1.39 1.29-2.15-.7-.26-1.37-.59-2-.98.17-.12.33-.25.49-.38a14.1 14.1 0 0 0 12.24 0c.16.13.32.26.49.38-.63.39-1.3.72-2 .98.37.76.8 1.48 1.29 2.15a19.83 19.83 0 0 0 6.06-3.06c.36-4.24-.62-7.92-2.65-11.19ZM8.68 13.33c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Zm6.64 0c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Z"/></svg>
       </a>
       <a class="social-icon" href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Watch us on YouTube">
@@ -114,10 +116,10 @@
       All regions operational
     </div>
     <h1>A Powerful Network</h1>
-    <p class="subtitle">Start your server in just <strong>$0.88/mo</strong>. Built for performance, trusted by hundreds.</p>
+    <p class="subtitle">Start your server in just <strong>₹0.88/mo</strong>. Built for performance, trusted by hundreds.</p>
     <div class="hero-ctas">
-      <a href="plans.html" class="btn btn-glow-solid">Explore Minecraft Plans</a>
-      <a href="plans.html#discord-bots" class="btn btn-glow">Other Hosting Services</a>
+      <a href="plans.html?type=minecraft" class="btn btn-glow-solid">Explore Minecraft Plans</a>
+      <a href="plans.html?type=other" class="btn btn-glow">Other Hosting Services</a>
     </div>
 
     <div class="metrics-strip" role="list">
@@ -170,6 +172,31 @@
 
     <div class="cpu-grid">
       <div class="cpu-card">
+        <svg class="cpu-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="chipIntel" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#8fd8ff"/>
+              <stop offset="100%" stop-color="#2f5bff"/>
+            </linearGradient>
+          </defs>
+          <g stroke="#5b6a8f" stroke-width="1.4">
+            <line x1="12" y1="22" x2="4" y2="22"/><line x1="12" y1="38" x2="4" y2="38"/>
+            <line x1="12" y1="54" x2="4" y2="54"/><line x1="12" y1="70" x2="4" y2="70"/>
+            <line x1="88" y1="22" x2="96" y2="22"/><line x1="88" y1="38" x2="96" y2="38"/>
+            <line x1="88" y1="54" x2="96" y2="54"/><line x1="88" y1="70" x2="96" y2="70"/>
+            <line x1="22" y1="12" x2="22" y2="4"/><line x1="38" y1="12" x2="38" y2="4"/>
+            <line x1="54" y1="12" x2="54" y2="4"/><line x1="70" y1="12" x2="70" y2="4"/>
+            <line x1="22" y1="88" x2="22" y2="96"/><line x1="38" y1="88" x2="38" y2="96"/>
+            <line x1="54" y1="88" x2="54" y2="96"/><line x1="70" y1="88" x2="70" y2="96"/>
+          </g>
+          <rect x="12" y="12" width="76" height="76" rx="6" fill="#0a1020" stroke="url(#chipIntel)" stroke-width="2"/>
+          <g fill="none" stroke="#3a5bdc" stroke-width="1" opacity="0.6">
+            <rect x="22" y="22" width="14" height="14"/><rect x="43" y="22" width="14" height="14"/><rect x="64" y="22" width="14" height="14"/>
+            <rect x="22" y="43" width="14" height="14"/><rect x="43" y="43" width="14" height="14"/><rect x="64" y="43" width="14" height="14"/>
+            <rect x="22" y="64" width="14" height="14"/><rect x="43" y="64" width="14" height="14"/><rect x="64" y="64" width="14" height="14"/>
+          </g>
+          <rect x="43" y="43" width="14" height="14" fill="#00e0ff" opacity="0.7"/>
+        </svg>
         <div class="cpu-brand">Intel</div>
         <div class="cpu-name">Xeon Gold</div>
         <div class="cpu-specs">
@@ -178,7 +205,33 @@
           <div class="row"><span>Storage</span><span>NVMe SSD</span></div>
         </div>
       </div>
+
       <div class="cpu-card">
+        <svg class="cpu-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="chipEpyc" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#c98bff"/>
+              <stop offset="100%" stop-color="#6a2fff"/>
+            </linearGradient>
+          </defs>
+          <g stroke="#6a5b8f" stroke-width="1.4">
+            <line x1="12" y1="22" x2="4" y2="22"/><line x1="12" y1="38" x2="4" y2="38"/>
+            <line x1="12" y1="54" x2="4" y2="54"/><line x1="12" y1="70" x2="4" y2="70"/>
+            <line x1="88" y1="22" x2="96" y2="22"/><line x1="88" y1="38" x2="96" y2="38"/>
+            <line x1="88" y1="54" x2="96" y2="54"/><line x1="88" y1="70" x2="96" y2="70"/>
+            <line x1="22" y1="12" x2="22" y2="4"/><line x1="38" y1="12" x2="38" y2="4"/>
+            <line x1="54" y1="12" x2="54" y2="4"/><line x1="70" y1="12" x2="70" y2="4"/>
+            <line x1="22" y1="88" x2="22" y2="96"/><line x1="38" y1="88" x2="38" y2="96"/>
+            <line x1="54" y1="88" x2="54" y2="96"/><line x1="70" y1="88" x2="70" y2="96"/>
+          </g>
+          <rect x="12" y="12" width="76" height="76" rx="6" fill="#0a1020" stroke="url(#chipEpyc)" stroke-width="2"/>
+          <g fill="none" stroke="#8a4fe0" stroke-width="1" opacity="0.6">
+            <rect x="18" y="18" width="30" height="30"/><rect x="52" y="18" width="30" height="30"/>
+            <rect x="18" y="52" width="30" height="30"/><rect x="52" y="52" width="30" height="30"/>
+          </g>
+          <circle cx="33" cy="33" r="3" fill="#c98bff"/><circle cx="67" cy="33" r="3" fill="#c98bff"/>
+          <circle cx="33" cy="67" r="3" fill="#c98bff"/><circle cx="67" cy="67" r="3" fill="#00e0ff"/>
+        </svg>
         <div class="cpu-brand">AMD</div>
         <div class="cpu-name">Epyc</div>
         <div class="cpu-specs">
@@ -187,7 +240,33 @@
           <div class="row"><span>Storage</span><span>NVMe SSD</span></div>
         </div>
       </div>
+
       <div class="cpu-card">
+        <svg class="cpu-art" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="chipRyzen" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#ffe1a8"/>
+              <stop offset="100%" stop-color="#ff8a3d"/>
+            </radialGradient>
+          </defs>
+          <g stroke="#8f7a5b" stroke-width="1.4">
+            <line x1="12" y1="22" x2="4" y2="22"/><line x1="12" y1="38" x2="4" y2="38"/>
+            <line x1="12" y1="54" x2="4" y2="54"/><line x1="12" y1="70" x2="4" y2="70"/>
+            <line x1="88" y1="22" x2="96" y2="22"/><line x1="88" y1="38" x2="96" y2="38"/>
+            <line x1="88" y1="54" x2="96" y2="54"/><line x1="88" y1="70" x2="96" y2="70"/>
+            <line x1="22" y1="12" x2="22" y2="4"/><line x1="38" y1="12" x2="38" y2="4"/>
+            <line x1="54" y1="12" x2="54" y2="4"/><line x1="70" y1="12" x2="70" y2="4"/>
+            <line x1="22" y1="88" x2="22" y2="96"/><line x1="38" y1="88" x2="38" y2="96"/>
+            <line x1="54" y1="88" x2="54" y2="96"/><line x1="70" y1="88" x2="70" y2="96"/>
+          </g>
+          <rect x="12" y="12" width="76" height="76" rx="6" fill="#0a1020" stroke="url(#chipRyzen)" stroke-width="2"/>
+          <g stroke="#ff8a3d" stroke-width="1" opacity="0.55">
+            <line x1="50" y1="50" x2="50" y2="20"/><line x1="50" y1="50" x2="76" y2="35"/>
+            <line x1="50" y1="50" x2="76" y2="65"/><line x1="50" y1="50" x2="50" y2="80"/>
+            <line x1="50" y1="50" x2="24" y2="65"/><line x1="50" y1="50" x2="24" y2="35"/>
+          </g>
+          <circle cx="50" cy="50" r="9" fill="url(#chipRyzen)"/>
+        </svg>
         <div class="cpu-brand">AMD</div>
         <div class="cpu-name">Ryzen 9 9950X</div>
         <div class="cpu-specs">
@@ -248,7 +327,7 @@
     <div class="footer-col">
       <h4>Community</h4>
       <ul>
-        <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer">Discord</a></li>
+        <li><a href="https://discord.gg/Q9EFKmKFFb" target="_blank" rel="noopener noreferrer">Discord</a></li>
         <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a></li>
       </ul>
     </div>
@@ -280,7 +359,8 @@
   </div>
   <div class="support-mode-tabs">
     <button id="modeTicket" class="active" type="button">Open a Ticket</button>
-    <button id="modeAdmin" type="button" style="display:none;">Admin Queue</button>
+    <button id="modeAdmin" type="button" style="display:none;">Support Queue</button>
+    <button id="modePurchases" type="button" style="display:none;">Purchases</button>
   </div>
   <div class="support-body">
     <div id="bodyTicket" class="support-mode-body">
@@ -295,6 +375,10 @@
     <div id="bodyAdmin" class="support-mode-body" style="display:none;">
       <h5>Open tickets</h5>
       <div class="ticket-list" id="adminQueueList"></div>
+    </div>
+    <div id="bodyPurchases" class="support-mode-body" style="display:none;">
+      <h5>Purchase requests</h5>
+      <div class="ticket-list" id="adminPurchasesList"></div>
     </div>
   </div>
 </div>
