@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/png" href="logo.png">
 </head>
 <body>
 
@@ -17,24 +18,71 @@
   </symbol>
 </svg>
 
-<div id="starfield" aria-hidden="true"></div>
+<div id="starfield" aria-hidden="true">
+  <div class="nebula-layer" aria-hidden="true"></div>
+  <div class="planet-wrap" aria-hidden="true">
+    <svg class="planet-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="planetShade" cx="35%" cy="32%" r="75%">
+          <stop offset="0%" stop-color="#7fd8ff"/>
+          <stop offset="35%" stop-color="#2f7bff"/>
+          <stop offset="70%" stop-color="#15326e"/>
+          <stop offset="100%" stop-color="#050a1a"/>
+        </radialGradient>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#00e0ff" stop-opacity="0.05"/>
+          <stop offset="18%" stop-color="#00e0ff" stop-opacity="0.5"/>
+          <stop offset="50%" stop-color="#e9edf7" stop-opacity="0.75"/>
+          <stop offset="82%" stop-color="#2f5bff" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#2f5bff" stop-opacity="0.05"/>
+        </linearGradient>
+        <clipPath id="planetClip">
+          <circle cx="200" cy="200" r="95"/>
+        </clipPath>
+      </defs>
+
+      <!-- Ring, full pass (reads behind + in front of the sphere) -->
+      <g transform="rotate(-16 200 200)">
+        <path d="M 15,200 A 185,50 0 1,0 385,200 A 185,50 0 1,0 15,200 Z
+                 M 82,200 A 118,32 0 1,1 318,200 A 118,32 0 1,1 82,200 Z"
+              fill="url(#ringGrad)" fill-rule="evenodd" opacity="0.65"/>
+      </g>
+
+      <!-- Planet sphere -->
+      <circle cx="200" cy="200" r="95" fill="url(#planetShade)"/>
+
+      <!-- Slowly rotating surface bands -->
+      <g class="planet-core" clip-path="url(#planetClip)">
+        <ellipse cx="150" cy="180" rx="120" ry="18" fill="#0a1e4d" opacity="0.35"/>
+        <ellipse cx="260" cy="230" rx="130" ry="14" fill="#0a1e4d" opacity="0.28"/>
+        <ellipse cx="190" cy="140" rx="100" ry="10" fill="#8fe6ff" opacity="0.18"/>
+        <ellipse cx="230" cy="270" rx="110" ry="12" fill="#8fe6ff" opacity="0.12"/>
+      </g>
+
+      <!-- Ring, front arc only (over the lower half of the sphere) -->
+      <g transform="rotate(-16 200 200)">
+        <clipPath id="ringFrontClip">
+          <rect x="0" y="200" width="400" height="200"/>
+        </clipPath>
+        <path d="M 15,200 A 185,50 0 1,0 385,200 A 185,50 0 1,0 15,200 Z
+                 M 82,200 A 118,32 0 1,1 318,200 A 118,32 0 1,1 82,200 Z"
+              fill="url(#ringGrad)" fill-rule="evenodd" opacity="0.85"
+              clip-path="url(#ringFrontClip)"/>
+      </g>
+
+      <!-- Small orbiting moon -->
+      <g class="moon-orbit">
+        <circle cx="350" cy="200" r="7" fill="#c9d6f5"/>
+      </g>
+    </svg>
+  </div>
+</div>
 
 <!-- ============ NAVBAR ============ -->
 <header class="navbar">
   <div class="navbar-inner">
     <a href="index.html" class="logo" aria-label="Range Cloud home">
-      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle class="node" cx="8" cy="10" r="2.6" fill="#00e0ff"/>
-        <circle class="node" cx="24" cy="8" r="2.6" fill="#2f5bff"/>
-        <circle class="node" cx="16" cy="24" r="2.6" fill="#00e0ff"/>
-        <path d="M8 10L24 8M8 10L16 24M24 8L16 24" stroke="url(#navGrad2)" stroke-width="1.3" stroke-linecap="round"/>
-        <defs>
-          <linearGradient id="navGrad2" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#2f5bff"/>
-            <stop offset="1" stop-color="#00e0ff"/>
-          </linearGradient>
-        </defs>
-      </svg>
+      <img src="logo.png" alt="Range Cloud" class="logo-mark">
       <span class="logo-text">Range Cloud</span>
     </a>
 
@@ -682,12 +730,7 @@
   <div class="footer-inner">
     <div class="footer-col">
       <a href="index.html" class="logo" style="margin-bottom:12px;">
-        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="8" cy="10" r="2.6" fill="#00e0ff"/>
-          <circle cx="24" cy="8" r="2.6" fill="#2f5bff"/>
-          <circle cx="16" cy="24" r="2.6" fill="#00e0ff"/>
-          <path d="M8 10L24 8M8 10L16 24M24 8L16 24" stroke="#2f5bff" stroke-width="1.3" stroke-linecap="round"/>
-        </svg>
+        <img src="logo.png" alt="Range Cloud" class="logo-mark">
         <span class="logo-text">Range Cloud</span>
       </a>
       <p style="color:var(--muted);font-size:0.85rem;max-width:260px;">Premium game and application hosting on enterprise hardware.</p>
