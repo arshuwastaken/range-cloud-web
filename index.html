@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Range Cloud — A Powerful Network</title>
+<meta name="description" content="Premium Minecraft and application hosting on Intel Xeon Gold, AMD Epyc, and Ryzen 9 9950X hardware. Plans from ₹0.88/mo equivalent. 99.9% uptime, enterprise DDoS protection, 24/7 support.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="starfield" aria-hidden="true"></div>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo" aria-label="Range Cloud home">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle class="node" cx="8" cy="10" r="2.6" fill="#00e0ff"/>
+        <circle class="node" cx="24" cy="8" r="2.6" fill="#2f5bff"/>
+        <circle class="node" cx="16" cy="24" r="2.6" fill="#00e0ff"/>
+        <path d="M8 10L24 8M8 10L16 24M24 8L16 24" stroke="url(#navGrad)" stroke-width="1.3" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="navGrad" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2f5bff"/>
+            <stop offset="1" stop-color="#00e0ff"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">Range Cloud</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html#features" data-page="index.html" class="active">Features</a>
+      <a href="plans.html" data-page="plans.html">Plans</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#support-section">Support</a>
+    </nav>
+
+    <div class="nav-right">
+      <a class="social-icon" href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3c-.22.4-.43.86-.6 1.28a18.27 18.27 0 0 0-5.57 0A11.6 11.6 0 0 0 9.115 3a19.736 19.736 0 0 0-4.432 1.37C1.98 8.19 1.24 11.9 1.55 15.56a19.9 19.9 0 0 0 6.06 3.06c.49-.67.92-1.39 1.29-2.15-.7-.26-1.37-.59-2-.98.17-.12.33-.25.49-.38a14.1 14.1 0 0 0 12.24 0c.16.13.32.26.49.38-.63.39-1.3.72-2 .98.37.76.8 1.48 1.29 2.15a19.83 19.83 0 0 0 6.06-3.06c.36-4.24-.62-7.92-2.65-11.19ZM8.68 13.33c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Zm6.64 0c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Z"/></svg>
+      </a>
+      <a class="social-icon" href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Watch us on YouTube">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.6 15.5V8.5l6.4 3.5-6.4 3.5Z"/></svg>
+      </a>
+      <div class="nav-account">
+        <a href="auth.html" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="auth.html#signup" class="btn btn-primary btn-sm">Sign Up</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page-content">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      All regions operational
+    </div>
+    <h1>A Powerful Network</h1>
+    <p class="subtitle">Start your server in just <strong>₹0.88/mo</strong>. Built for performance, trusted by hundreds.</p>
+    <div class="hero-ctas">
+      <a href="plans.html" class="btn btn-glow-solid">Explore Minecraft Plans</a>
+      <a href="plans.html#discord-bots" class="btn btn-glow">Other Hosting Services</a>
+    </div>
+
+    <div class="metrics-strip" role="list">
+      <div class="metric" role="listitem">
+        <div class="value">99.9%</div>
+        <div class="label">Uptime Guarantee</div>
+      </div>
+      <div class="metric" role="listitem">
+        <div class="value">24/7</div>
+        <div class="label">Expert Support</div>
+      </div>
+      <div class="metric" role="listitem">
+        <div class="value">&lt;10ms</div>
+        <div class="label">Network Latency</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="section" id="features">
+    <div class="section-head">
+      <span class="eyebrow">Why Range Cloud</span>
+      <h2>Infrastructure that doesn't flinch</h2>
+      <p>Every plan ships on enterprise-grade hardware with protection and support built in from the first minute.</p>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v6M12 16v6M4.9 4.9l4.2 4.2M14.9 14.9l4.2 4.2M2 12h6M16 12h6M4.9 19.1l4.2-4.2M14.9 9.1l4.2-4.2"/></svg>
+        </div>
+        <h3>99.9% Uptime Guarantee</h3>
+        <p>Redundant power, networking, and monitoring keep your server online, backed by a real SLA — not a marketing promise.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <h3>Enterprise DDoS Protection</h3>
+        <p>Every plan includes always-on mitigation tuned for game traffic, so a bad actor never takes your community offline.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>24/7 Expert Support</h3>
+        <p>A real human — not a bot script — answers tickets around the clock, from setup questions to emergency recovery.</p>
+      </div>
+    </div>
+
+    <div class="cpu-grid">
+      <div class="cpu-card">
+        <div class="cpu-brand">Intel</div>
+        <div class="cpu-name">Xeon Gold</div>
+        <div class="cpu-specs">
+          <div class="row"><span>Architecture</span><span>Server-grade multi-core</span></div>
+          <div class="row"><span>Best for</span><span>Budget & mid-size servers</span></div>
+          <div class="row"><span>Storage</span><span>NVMe SSD</span></div>
+        </div>
+      </div>
+      <div class="cpu-card">
+        <div class="cpu-brand">AMD</div>
+        <div class="cpu-name">Epyc</div>
+        <div class="cpu-specs">
+          <div class="row"><span>Architecture</span><span>High core-density server CPU</span></div>
+          <div class="row"><span>Best for</span><span>Large modpacks & networks</span></div>
+          <div class="row"><span>Storage</span><span>NVMe SSD</span></div>
+        </div>
+      </div>
+      <div class="cpu-card">
+        <div class="cpu-brand">AMD</div>
+        <div class="cpu-name">Ryzen 9 9950X</div>
+        <div class="cpu-specs">
+          <div class="row"><span>Architecture</span><span>Flagship single-core performance</span></div>
+          <div class="row"><span>Best for</span><span>Maximum TPS & heavy plugins</span></div>
+          <div class="row"><span>Storage</span><span>NVMe SSD</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="section" id="about">
+    <div class="section-head">
+      <span class="eyebrow">About Range Cloud</span>
+      <h2>Hosting built by people who play</h2>
+      <p>We run the same servers we'd want to play on — low latency, honest pricing, and a support team that actually reads your ticket. Range Cloud powers Minecraft servers, Discord bots, and general-purpose hosting for hundreds of communities.</p>
+    </div>
+  </section>
+
+  <!-- ============ CTA STRIP ============ -->
+  <section class="section" style="padding-top:0;">
+    <div class="feature-card" style="max-width:900px;margin:0 auto;text-align:center;padding:50px 40px;">
+      <h2 style="font-family:var(--font-display);font-size:1.7rem;margin-bottom:12px;">Ready to deploy?</h2>
+      <p style="color:var(--text-dim);margin-bottom:26px;">Spin up a server in minutes — no long-term contract required.</p>
+      <a href="plans.html" class="btn btn-glow-solid">View All Plans</a>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer page-content">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <a href="index.html" class="logo" style="margin-bottom:12px;">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="8" cy="10" r="2.6" fill="#00e0ff"/>
+          <circle cx="24" cy="8" r="2.6" fill="#2f5bff"/>
+          <circle cx="16" cy="24" r="2.6" fill="#00e0ff"/>
+          <path d="M8 10L24 8M8 10L16 24M24 8L16 24" stroke="#2f5bff" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">Range Cloud</span>
+      </a>
+      <p style="color:var(--muted);font-size:0.85rem;max-width:260px;">Premium game and application hosting on enterprise hardware.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="plans.html">All Plans</a></li>
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="auth.html">Sign In</a></li>
+        <li><a href="auth.html#signup">Sign Up</a></li>
+        <li><a href="auth.html#dashboard">Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer">Discord</a></li>
+        <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Range Cloud. All rights reserved.</span>
+    <span>Optimised for Cloudflare Pages</span>
+  </div>
+</footer>
+
+<!-- ============ SUPPORT WIDGET ============ -->
+<button class="support-launcher" id="supportLauncher" aria-label="Open live support">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6 2 11c0 2.4 1 4.6 2.7 6.2-.2 1.4-.8 2.7-1.7 3.8 1.6 0 3.4-.5 4.9-1.4 1.3.5 2.7.8 4.1.8 5.5 0 10-4 10-9s-4.5-9-10-9Z"/></svg>
+  <span class="ping" id="supportPing"></span>
+</button>
+
+<div class="support-panel" id="supportPanel" role="dialog" aria-label="Live support">
+  <div class="support-header">
+    <div class="title">
+      <span class="dot"></span>
+      <div>
+        <h4>Range Cloud Support</h4>
+        <div class="sub">Typically replies within minutes</div>
+      </div>
+    </div>
+    <button class="support-close" id="supportClose" aria-label="Close support panel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="support-mode-tabs">
+    <button id="modeTicket" class="active" type="button">Open a Ticket</button>
+    <button id="modeAdmin" type="button" style="display:none;">Admin Queue</button>
+  </div>
+  <div class="support-body">
+    <div id="bodyTicket" class="support-mode-body">
+      <h5>Tell us what's going on</h5>
+      <form id="ticketForm">
+        <textarea id="ticketMessage" placeholder="Describe your issue or question in detail..." required></textarea>
+        <input type="email" id="ticketEmail" placeholder="Contact email (optional)">
+        <button type="submit" class="btn btn-primary btn-block btn-sm">Submit Ticket</button>
+        <div class="form-msg" id="ticketFeedback"></div>
+      </form>
+    </div>
+    <div id="bodyAdmin" class="support-mode-body" style="display:none;">
+      <h5>Open tickets</h5>
+      <div class="ticket-list" id="adminQueueList"></div>
+    </div>
+  </div>
+</div>
+
+<div id="support-section"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
