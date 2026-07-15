@@ -20,11 +20,20 @@
   const ctx = canvas.getContext('2d');
 
   let width, height, dpr;
-  let stars = [];
+  let layers = [];       // parallax star layers, back to front
+  let comets = [];       // occasional streaking comets
+  let pointerX = 0, pointerY = 0;   // normalized -1..1
+  let driftX = 0, driftY = 0;       // eased pointer parallax
   let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const STAR_COUNT_DIVISOR = 9000; // stars per px^2 approx
-  const LINK_DIST = 130;
+  const LINK_DIST = 120;
+
+  // Three depth layers: far (small, slow, dense), mid, near (large, fast, sparse)
+  const LAYER_CONFIG = [
+    { divisor: 16000, sizeMin: 0.3, sizeMax: 0.9, speed: 0.012, parallax: 6,  alpha: 0.55 },
+    { divisor: 26000, sizeMin: 0.6, sizeMax: 1.4, speed: 0.028, parallax: 14, alpha: 0.75 },
+    { divisor: 60000, sizeMin: 1.0, sizeMax: 2.1, speed: 0.05,  parallax: 26, alpha: 0.95 }
+  ];
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -35,68 +44,149 @@
     canvas.style.width = width + 'px';
     canvas.style.height = height + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    seedStars();
+    seedLayers();
   }
 
-  function seedStars() {
-    const count = Math.min(160, Math.floor((width * height) / STAR_COUNT_DIVISOR));
-    stars = new Array(count).fill(0).map(() => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      r: Math.random() * 1.4 + 0.4,
-      vx: (Math.random() - 0.5) * 0.06,
-      vy: (Math.random() - 0.5) * 0.06,
-      tw: Math.random() * Math.PI * 2,
-      twSpeed: 0.005 + Math.random() * 0.01
-    }));
+  function seedLayers() {
+    layers = LAYER_CONFIG.map(cfg => {
+      const count = Math.max(18, Math.floor((width * height) / cfg.divisor));
+      const stars = new Array(count).fill(0).map(() => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: cfg.sizeMin + Math.random() * (cfg.sizeMax - cfg.sizeMin),
+        vx: (Math.random() - 0.5) * cfg.speed,
+        vy: (Math.random() - 0.5) * cfg.speed + cfg.speed * 0.3,
+        tw: Math.random() * Math.PI * 2,
+        twSpeed: 0.006 + Math.random() * 0.014
+      }));
+      return { cfg, stars };
+    });
+  }
+
+  function spawnComet() {
+    const fromLeft = Math.random() > 0.5;
+    const y = Math.random() * height * 0.5;
+    comets.push({
+      x: fromLeft ? -60 : width + 60,
+      y: y,
+      vx: (fromLeft ? 1 : -1) * (3.6 + Math.random() * 2.4),
+      vy: 1.4 + Math.random() * 1.2,
+      life: 0,
+      maxLife: 90 + Math.random() * 30,
+      len: 90 + Math.random() * 60
+    });
+  }
+
+  function maybeSpawnComet() {
+    if (reduced) return;
+    if (Math.random() < 0.0035 && comets.length < 2) spawnComet();
+  }
+
+  function drawComets() {
+    for (let i = comets.length - 1; i >= 0; i--) {
+      const c = comets[i];
+      c.x += c.vx;
+      c.y += c.vy;
+      c.life++;
+
+      const tailX = c.x - c.vx * (c.len / Math.hypot(c.vx, c.vy));
+      const tailY = c.y - c.vy * (c.len / Math.hypot(c.vx, c.vy));
+      const fadeIn = Math.min(1, c.life / 12);
+      const fadeOut = Math.min(1, (c.maxLife - c.life) / 20);
+      const alpha = Math.max(0, Math.min(fadeIn, fadeOut));
+
+      const grad = ctx.createLinearGradient(tailX, tailY, c.x, c.y);
+      grad.addColorStop(0, 'rgba(0, 224, 255, 0)');
+      grad.addColorStop(1, `rgba(233, 245, 255, ${0.85 * alpha})`);
+      ctx.beginPath();
+      ctx.moveTo(tailX, tailY);
+      ctx.lineTo(c.x, c.y);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, 1.6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.fill();
+
+      if (c.life > c.maxLife || c.x < -120 || c.x > width + 120 || c.y > height + 120) {
+        comets.splice(i, 1);
+      }
+    }
   }
 
   function step() {
     ctx.clearRect(0, 0, width, height);
 
-    for (let i = 0; i < stars.length; i++) {
-      const s = stars[i];
-      if (!reduced) {
-        s.x += s.vx;
-        s.y += s.vy;
-        s.tw += s.twSpeed;
-        if (s.x < -10) s.x = width + 10;
-        if (s.x > width + 10) s.x = -10;
-        if (s.y < -10) s.y = height + 10;
-        if (s.y > height + 10) s.y = -10;
-      }
-      const twinkle = 0.55 + Math.sin(s.tw) * 0.45;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(233, 237, 247, ${0.35 + twinkle * 0.5})`;
-      ctx.fill();
-    }
+    // Ease pointer-driven parallax drift toward target
+    driftX += (pointerX - driftX) * 0.04;
+    driftY += (pointerY - driftY) * 0.04;
 
-    // Network links between nearby stars
-    for (let i = 0; i < stars.length; i++) {
-      for (let j = i + 1; j < stars.length; j++) {
-        const a = stars[i], b = stars[j];
-        const dx = a.x - b.x, dy = a.y - b.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < LINK_DIST) {
-          const alpha = (1 - dist / LINK_DIST) * 0.18;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
-          grad.addColorStop(0, `rgba(47, 91, 255, ${alpha})`);
-          grad.addColorStop(1, `rgba(0, 224, 255, ${alpha})`);
-          ctx.strokeStyle = grad;
-          ctx.lineWidth = 1;
-          ctx.stroke();
+    layers.forEach(layer => {
+      const { cfg, stars } = layer;
+      const offX = driftX * cfg.parallax;
+      const offY = driftY * cfg.parallax;
+
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
+        if (!reduced) {
+          s.x += s.vx;
+          s.y += s.vy;
+          s.tw += s.twSpeed;
+          if (s.x < -10) s.x = width + 10;
+          if (s.x > width + 10) s.x = -10;
+          if (s.y < -10) s.y = height + 10;
+          if (s.y > height + 10) s.y = -10;
+        }
+        const twinkle = 0.5 + Math.sin(s.tw) * 0.5;
+        ctx.beginPath();
+        ctx.arc(s.x + offX, s.y + offY, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(233, 237, 247, ${cfg.alpha * (0.3 + twinkle * 0.6)})`;
+        ctx.fill();
+      }
+    });
+
+    // Network links only within the nearest (front) layer for legibility
+    const front = layers[layers.length - 1];
+    if (front) {
+      const offX = driftX * front.cfg.parallax;
+      const offY = driftY * front.cfg.parallax;
+      const stars = front.stars;
+      for (let i = 0; i < stars.length; i++) {
+        for (let j = i + 1; j < stars.length; j++) {
+          const a = stars[i], b = stars[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < LINK_DIST) {
+            const alpha = (1 - dist / LINK_DIST) * 0.16;
+            ctx.beginPath();
+            ctx.moveTo(a.x + offX, a.y + offY);
+            ctx.lineTo(b.x + offX, b.y + offY);
+            const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+            grad.addColorStop(0, `rgba(47, 91, 255, ${alpha})`);
+            grad.addColorStop(1, `rgba(0, 224, 255, ${alpha})`);
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
         }
       }
     }
+
+    maybeSpawnComet();
+    drawComets();
 
     if (!reduced) requestAnimationFrame(step);
   }
 
   window.addEventListener('resize', resize);
+  window.addEventListener('pointermove', (e) => {
+    pointerX = (e.clientX / window.innerWidth) * 2 - 1;
+    pointerY = (e.clientY / window.innerHeight) * 2 - 1;
+  }, { passive: true });
+
   resize();
   requestAnimationFrame(step);
   if (reduced) step(); // draw a single static frame
