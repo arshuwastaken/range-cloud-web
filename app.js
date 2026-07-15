@@ -6,10 +6,51 @@
 'use strict';
 
 /* ============================================================
+   0. PAGE TRANSITIONS + LOADING BAR
+   A thin gradient bar sweeps across the top on every navigation,
+   and the page body cross-fades in/out. Purely cosmetic polish —
+   internal links are intercepted just long enough to play the
+   exit transition, then navigation proceeds normally.
+   ============================================================ */
+(function pageTransitions() {
+  const bar = document.getElementById('loadingBar');
+
+  function finishBar() {
+    if (!bar) return;
+    bar.style.width = '100%';
+    setTimeout(() => bar.classList.add('done'), 220);
+  }
+
+  if (bar) {
+    requestAnimationFrame(() => { bar.style.width = '65%'; });
+    if (document.readyState === 'complete') finishBar();
+    else window.addEventListener('load', finishBar);
+  }
+
+  requestAnimationFrame(() => {
+    document.body.classList.remove('page-enter');
+  });
+
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (!a) return;
+    const href = a.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:') || a.target === '_blank') return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+
+    e.preventDefault();
+    document.body.classList.add('page-exit');
+    if (bar) { bar.classList.remove('done'); bar.style.width = '30%'; }
+    setTimeout(() => { window.location.href = href; }, 200);
+  });
+})();
+
+/* ============================================================
    1. STARFIELD / NETWORK CANVAS
-   Ambient background: stars drift slowly; when two stars pass
-   near each other a thin connection pulses between them —
-   a literal "network forming in the dark" signature.
+   Layered parallax stars, a drifting nebula (handled in CSS),
+   occasional comets, and pointer-driven depth drift — a literal
+   "network forming in the dark" signature tying back to the
+   "powerful network" positioning.
    ============================================================ */
 (function starfield() {
   const canvasHost = document.getElementById('starfield');
@@ -20,15 +61,14 @@
   const ctx = canvas.getContext('2d');
 
   let width, height, dpr;
-  let layers = [];       // parallax star layers, back to front
-  let comets = [];       // occasional streaking comets
-  let pointerX = 0, pointerY = 0;   // normalized -1..1
-  let driftX = 0, driftY = 0;       // eased pointer parallax
+  let layers = [];
+  let comets = [];
+  let pointerX = 0, pointerY = 0;
+  let driftX = 0, driftY = 0;
   let reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const LINK_DIST = 120;
 
-  // Three depth layers: far (small, slow, dense), mid, near (large, fast, sparse)
   const LAYER_CONFIG = [
     { divisor: 16000, sizeMin: 0.3, sizeMax: 0.9, speed: 0.012, parallax: 6,  alpha: 0.55 },
     { divisor: 26000, sizeMin: 0.6, sizeMax: 1.4, speed: 0.028, parallax: 14, alpha: 0.75 },
@@ -120,7 +160,6 @@
   function step() {
     ctx.clearRect(0, 0, width, height);
 
-    // Ease pointer-driven parallax drift toward target
     driftX += (pointerX - driftX) * 0.04;
     driftY += (pointerY - driftY) * 0.04;
 
@@ -148,7 +187,6 @@
       }
     });
 
-    // Network links only within the nearest (front) layer for legibility
     const front = layers[layers.length - 1];
     if (front) {
       const offX = driftX * front.cfg.parallax;
@@ -189,42 +227,70 @@
 
   resize();
   requestAnimationFrame(step);
-  if (reduced) step(); // draw a single static frame
+  if (reduced) step();
 })();
 
 /* ============================================================
-   2. SESSION / AUTH STATE
-   Mock authentication using localStorage. This is a front-end
-   demo simulation only — a real deployment must verify sessions
-   server-side (e.g. Cloudflare Workers + signed cookies).
+   2. CORE STATE — auth, tickets, purchases
+
+   SECURITY NOTE (read this before deploying live):
+   This entire layer runs on localStorage, which lives only in
+   one visitor's own browser. There is no shared database and no
+   server verifying anything, which means two things in practice:
+
+   1. Nobody can see or tamper with ANOTHER person's account,
+      tickets, or purchases — each browser only ever has its own
+      local copy. A stranger opening dev tools on their own laptop
+      cannot reach your real customer data, because that data was
+      never sent anywhere; it doesn't exist outside the customer's
+      own browser.
+   2. However, ANY visitor can grant themselves the admin UI in
+      THEIR OWN browser by signing up with the reserved admin
+      username, or by editing their own localStorage directly.
+      That unlocks the admin-only panels cosmetically on their
+      screen, but — per point 1 — it does not expose real tickets
+      or purchases belonging to other people, because those never
+      left the other person's browser in the first place.
+
+   The one real action item on your side: sign up using the
+   reserved admin username yourself, on the live site, before
+   anyone else does — usernames are first-come-first-served per
+   browser/device the way this demo is built. Once an account with
+   that username has your password on your own devices, nobody
+   else can register the same username again on a shared backend
+   (if/when you add one).
+
+   For a real production deployment where staff need to manage
+   real customer tickets and purchases from a different device
+   than the customer used, you need an actual backend (e.g.
+   Cloudflare Workers + D1/KV, with sessions verified server-side)
+   — this file cannot provide that on its own, and no amount of
+   client-side obfuscation changes that.
    ============================================================ */
-const RC = (function auth() {
+const RC = (function core() {
   const USERS_KEY = 'rc_users';
   const SESSION_KEY = 'rc_session';
   const TICKETS_KEY = 'rc_tickets';
+  const PURCHASES_KEY = 'rc_purchases';
+  const RATE_KEY = 'rc_rate';
   const ADMIN_ID = 'lordkira146';
 
+  /* ---------- Low-level storage ---------- */
   function getUsers() {
     try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
     catch (e) { return []; }
   }
-  function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
+  function saveUsers(users) { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
   function getSession() {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY)); }
     catch (e) { return null; }
   }
-  function setSession(sess) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
-  }
-  function clearSession() {
-    localStorage.removeItem(SESSION_KEY);
-  }
+  function setSession(sess) { localStorage.setItem(SESSION_KEY, JSON.stringify(sess)); }
+  function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
   function hash(str) {
     // Lightweight non-cryptographic obfuscation for this client-side demo.
-    // A production system must hash + salt passwords server-side (e.g. bcrypt/argon2).
+    // A production system must hash + salt passwords server-side (bcrypt/argon2).
     let h = 0;
     for (let i = 0; i < str.length; i++) {
       h = (h << 5) - h + str.charCodeAt(i);
@@ -233,6 +299,28 @@ const RC = (function auth() {
     return 'h_' + Math.abs(h).toString(36) + '_' + str.length;
   }
 
+  function sanitize(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  /* ---------- Very simple client-side rate limiting ----------
+     Not a substitute for real server-side rate limiting, but it
+     stops naive spam-clicking of forms in this demo. ---------- */
+  function rateLimited(key, cooldownMs) {
+    try {
+      const store = JSON.parse(localStorage.getItem(RATE_KEY)) || {};
+      const last = store[key] || 0;
+      const now = Date.now();
+      if (now - last < cooldownMs) return true;
+      store[key] = now;
+      localStorage.setItem(RATE_KEY, JSON.stringify(store));
+      return false;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- Roles ---------- */
   function isElevated(idOrUsername, role) {
     return idOrUsername === ADMIN_ID || role === 'supporter';
   }
@@ -242,6 +330,7 @@ const RC = (function auth() {
     return storedRole || 'user';
   }
 
+  /* ---------- Auth ---------- */
   function signUp({ username, email, password }) {
     username = (username || '').trim();
     email = (email || '').trim().toLowerCase();
@@ -286,6 +375,9 @@ const RC = (function auth() {
     if (!username || !password) {
       return { ok: false, error: 'Enter your username and password.' };
     }
+    if (rateLimited('signin:' + username.toLowerCase(), 800)) {
+      return { ok: false, error: 'Too many attempts — wait a moment and try again.' };
+    }
     const users = getUsers();
     const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user || user.passwordHash !== hash(password)) {
@@ -299,9 +391,7 @@ const RC = (function auth() {
     return { ok: true, user };
   }
 
-  function signOut() {
-    clearSession();
-  }
+  function signOut() { clearSession(); }
 
   function currentUser() {
     const sess = getSession();
@@ -352,14 +442,19 @@ const RC = (function auth() {
     return Math.min(score, 5);
   }
 
-  /* ---------- Tickets ---------- */
+  function discordTagValid(tag) {
+    tag = (tag || '').trim();
+    // Accepts modern unique usernames (2-32 chars, lowercase/digits/._) or legacy Name#1234
+    return /^[a-z0-9_.]{2,32}$/.test(tag) || /^.{2,32}#[0-9]{4}$/.test(tag);
+  }
+
+  /* ---------- Tickets (general support) ---------- */
   function getTickets() {
     try { return JSON.parse(localStorage.getItem(TICKETS_KEY)) || []; }
     catch (e) { return []; }
   }
-  function saveTickets(tickets) {
-    localStorage.setItem(TICKETS_KEY, JSON.stringify(tickets));
-  }
+  function saveTickets(tickets) { localStorage.setItem(TICKETS_KEY, JSON.stringify(tickets)); }
+
   function submitTicket({ message, contactEmail }) {
     message = (message || '').trim();
     if (message.length < 10) {
@@ -367,6 +462,9 @@ const RC = (function auth() {
     }
     if (message.length > 1500) {
       return { ok: false, error: 'Message is too long (max 1500 characters).' };
+    }
+    if (rateLimited('ticket', 4000)) {
+      return { ok: false, error: 'Please wait a few seconds before sending another ticket.' };
     }
     const sess = getSession();
     const tickets = getTickets();
@@ -389,18 +487,120 @@ const RC = (function auth() {
     saveTickets(tickets);
   }
 
-  function sanitize(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+  /* ---------- Purchases (plan orders + saved chat thread) ----------
+     Chat persists in localStorage, which — per the note above —
+     only exists inside the browser it was created in. Treat this
+     as a working local demo of the flow, not a live cross-device
+     support inbox, until a real backend is wired in. ---------- */
+  function getPurchases() {
+    try { return JSON.parse(localStorage.getItem(PURCHASES_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  function savePurchases(list) { localStorage.setItem(PURCHASES_KEY, JSON.stringify(list)); }
+
+  function getPurchaseById(id) {
+    return getPurchases().find(p => p.id === id) || null;
+  }
+
+  function submitPurchase({ discordTag, notes, plan }) {
+    const user = currentUser();
+    if (!user) {
+      return { ok: false, error: 'Please sign in before starting a purchase.' };
+    }
+    discordTag = (discordTag || '').trim();
+    if (!discordTagValid(discordTag)) {
+      return { ok: false, error: 'Enter a valid Discord username (e.g. yourname or yourname#1234).' };
+    }
+    if (!plan || !plan.planName || !plan.price) {
+      return { ok: false, error: 'Missing plan details — go back and choose a plan again.' };
+    }
+    if (rateLimited('purchase', 4000)) {
+      return { ok: false, error: 'Please wait a few seconds before submitting again.' };
+    }
+
+    const purchases = getPurchases();
+    const order = {
+      id: 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      userId: user.id,
+      username: user.username,
+      discordTag: sanitize(discordTag),
+      plan: {
+        category: sanitize(plan.category || ''),
+        planName: sanitize(plan.planName || ''),
+        price: sanitize(String(plan.price || '')),
+        ram: sanitize(plan.ram || ''),
+        storage: sanitize(plan.storage || ''),
+        cpu: sanitize(plan.cpu || ''),
+        location: sanitize(plan.location || '')
+      },
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      messages: notes ? [{
+        id: 'm_' + Date.now().toString(36),
+        sender: 'user',
+        authorName: user.username,
+        text: sanitize(notes.trim()),
+        at: new Date().toISOString()
+      }] : []
+    };
+    purchases.unshift(order);
+    savePurchases(purchases);
+    return { ok: true, order };
+  }
+
+  function addPurchaseMessage(id, text) {
+    text = (text || '').trim();
+    if (!text) return { ok: false, error: 'Message cannot be empty.' };
+    if (text.length > 1000) return { ok: false, error: 'Message is too long (max 1000 characters).' };
+
+    const user = currentUser();
+    if (!user) return { ok: false, error: 'Sign in required.' };
+
+    const purchases = getPurchases();
+    const order = purchases.find(p => p.id === id);
+    if (!order) return { ok: false, error: 'Order not found.' };
+
+    const elevated = isElevated(user.username, user.role);
+    const isOwner = order.userId === user.id;
+    if (!elevated && !isOwner) {
+      return { ok: false, error: 'You do not have access to this conversation.' };
+    }
+
+    order.messages.push({
+      id: 'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+      sender: elevated && !isOwner ? 'admin' : (elevated && isOwner ? 'admin' : 'user'),
+      authorName: user.username,
+      text: sanitize(text),
+      at: new Date().toISOString()
+    });
+    savePurchases(purchases);
+    return { ok: true, order };
+  }
+
+  function setPurchaseStatus(id, status) {
+    const purchases = getPurchases();
+    const order = purchases.find(p => p.id === id);
+    if (!order) return { ok: false, error: 'Order not found.' };
+    order.status = status;
+    savePurchases(purchases);
+    return { ok: true, order };
+  }
+
+  function canAccessPurchase(order) {
+    const user = currentUser();
+    if (!user) return false;
+    return isElevated(user.username, user.role) || order.userId === user.id;
   }
 
   return {
     ADMIN_ID,
     signUp, signIn, signOut, currentUser, deleteAccount,
-    passwordMeetsPolicy, passwordStrength,
+    passwordMeetsPolicy, passwordStrength, discordTagValid,
     isElevated,
-    submitTicket, getTickets, closeTicket, saveTickets
+    submitTicket, getTickets, closeTicket,
+    getPurchases, getPurchaseById, submitPurchase, addPurchaseMessage,
+    setPurchaseStatus, canAccessPurchase,
+    sanitize
   };
 })();
 
@@ -450,6 +650,9 @@ const RC = (function auth() {
 
 /* ============================================================
    4. SUPPORT WIDGET — visible on every page
+   Three modes: Ticket (everyone), Support Queue (admin), and
+   Purchases (admin) — the new section after Support, where staff
+   reply into a purchase's saved chat thread.
    ============================================================ */
 (function supportWidget() {
   const launcher = document.getElementById('supportLauncher');
@@ -459,29 +662,36 @@ const RC = (function auth() {
   const closeBtn = document.getElementById('supportClose');
   const modeTicket = document.getElementById('modeTicket');
   const modeAdmin = document.getElementById('modeAdmin');
+  const modePurchases = document.getElementById('modePurchases');
   const bodyTicket = document.getElementById('bodyTicket');
   const bodyAdmin = document.getElementById('bodyAdmin');
+  const bodyPurchases = document.getElementById('bodyPurchases');
   const ticketForm = document.getElementById('ticketForm');
   const ticketMsg = document.getElementById('ticketMessage');
   const ticketEmail = document.getElementById('ticketEmail');
   const ticketFeedback = document.getElementById('ticketFeedback');
   const queueList = document.getElementById('adminQueueList');
+  const purchasesQueueList = document.getElementById('adminPurchasesList');
   const pingBadge = launcher.querySelector('.ping');
 
   function refreshAccess() {
     const user = RC.currentUser();
     const elevated = user && RC.isElevated(user.username, user.role);
-    if (modeAdmin) {
-      modeAdmin.style.display = elevated ? 'block' : 'none';
+    if (modeAdmin) modeAdmin.style.display = elevated ? 'block' : 'none';
+    if (modePurchases) modePurchases.style.display = elevated ? 'block' : 'none';
+
+    if (!elevated) {
+      if (bodyAdmin && bodyAdmin.classList.contains('active')) switchMode('ticket');
+      if (bodyPurchases && bodyPurchases.classList.contains('active')) switchMode('ticket');
     }
-    if (!elevated && bodyAdmin && bodyAdmin.classList.contains('active')) {
-      switchMode('ticket');
-    }
+
     if (elevated) {
-      const openCount = RC.getTickets().filter(t => t.status === 'open').length;
-      if (openCount > 0) {
+      const openTickets = RC.getTickets().filter(t => t.status === 'open').length;
+      const openPurchases = RC.getPurchases().filter(p => p.status === 'pending').length;
+      const total = openTickets + openPurchases;
+      if (total > 0) {
         pingBadge.classList.add('show');
-        pingBadge.textContent = openCount > 9 ? '9+' : String(openCount);
+        pingBadge.textContent = total > 9 ? '9+' : String(total);
       } else {
         pingBadge.classList.remove('show');
       }
@@ -493,14 +703,18 @@ const RC = (function auth() {
 
   function switchMode(mode) {
     const elevated = refreshAccess();
-    if (mode === 'admin' && !elevated) mode = 'ticket';
+    if ((mode === 'admin' || mode === 'purchases') && !elevated) mode = 'ticket';
+
     modeTicket.classList.toggle('active', mode === 'ticket');
     if (modeAdmin) modeAdmin.classList.toggle('active', mode === 'admin');
-    bodyTicket.classList.toggle('active', mode === 'ticket');
-    if (bodyAdmin) bodyAdmin.classList.toggle('active', mode === 'admin');
+    if (modePurchases) modePurchases.classList.toggle('active', mode === 'purchases');
+
     bodyTicket.style.display = mode === 'ticket' ? 'block' : 'none';
     if (bodyAdmin) bodyAdmin.style.display = mode === 'admin' ? 'block' : 'none';
+    if (bodyPurchases) bodyPurchases.style.display = mode === 'purchases' ? 'block' : 'none';
+
     if (mode === 'admin') renderQueue();
+    if (mode === 'purchases') renderPurchasesQueue();
   }
 
   function renderQueue() {
@@ -532,6 +746,26 @@ const RC = (function auth() {
     });
   }
 
+  function renderPurchasesQueue() {
+    if (!purchasesQueueList) return;
+    const purchases = RC.getPurchases();
+    if (purchases.length === 0) {
+      purchasesQueueList.innerHTML = '<div class="empty-state">No purchase requests yet.</div>';
+      return;
+    }
+    purchasesQueueList.innerHTML = purchases.map(p => `
+      <div class="ticket-item" data-id="${p.id}">
+        <div class="meta">
+          <span>${p.username} · ${new Date(p.createdAt).toLocaleString()}</span>
+          <span class="tag">${p.status}</span>
+        </div>
+        <div class="body"><strong>${p.plan.planName}</strong> — ${p.plan.category} — ₹${p.plan.price}/mo</div>
+        <div class="field-hint">Discord: ${p.discordTag}</div>
+        <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="purchase.html?id=${encodeURIComponent(p.id)}">Open chat</a>
+      </div>
+    `).join('');
+  }
+
   launcher.addEventListener('click', () => {
     panel.classList.add('show');
     refreshAccess();
@@ -545,6 +779,7 @@ const RC = (function auth() {
 
   modeTicket.addEventListener('click', () => switchMode('ticket'));
   if (modeAdmin) modeAdmin.addEventListener('click', () => switchMode('admin'));
+  if (modePurchases) modePurchases.addEventListener('click', () => switchMode('purchases'));
 
   if (ticketForm) {
     ticketForm.addEventListener('submit', (e) => {
@@ -569,11 +804,47 @@ const RC = (function auth() {
 
 /* ============================================================
    5. PLANS PAGE — tab filtering
+   Supports two entry modes via ?type= query param:
+     ?type=minecraft -> only Intel / Epyc / Ryzen7 / Ryzen9 tabs
+     ?type=other     -> only the Discord Bot Hosting tab
+   No param (e.g. from the main "Plans" nav link) shows everything.
    ============================================================ */
 (function plansTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
   const panels = document.querySelectorAll('.tab-panel');
   if (!tabs.length) return;
+
+  const params = new URLSearchParams(location.search);
+  const type = params.get('type');
+
+  if (type === 'minecraft' || type === 'other') {
+    tabs.forEach(tab => {
+      const isDiscord = tab.dataset.target === 'discord-bots';
+      const show = type === 'minecraft' ? !isDiscord : isDiscord;
+      tab.style.display = show ? '' : 'none';
+    });
+    panels.forEach(panel => {
+      const isDiscord = panel.id === 'discord-bots';
+      const show = type === 'minecraft' ? !isDiscord : isDiscord;
+      if (!show) panel.classList.remove('active');
+    });
+    const firstVisible = Array.from(tabs).find(t => t.style.display !== 'none');
+    if (firstVisible && !document.getElementById(firstVisible.dataset.target).classList.contains('active')) {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      firstVisible.classList.add('active');
+      document.getElementById(firstVisible.dataset.target).classList.add('active');
+    }
+  } else if (location.hash) {
+    const target = location.hash.slice(1);
+    const targetTab = Array.from(tabs).find(t => t.dataset.target === target);
+    if (targetTab) {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      targetTab.classList.add('active');
+      document.getElementById(target).classList.add('active');
+    }
+  }
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -711,6 +982,8 @@ const RC = (function auth() {
       adminPanel.classList.remove('show');
     }
 
+    renderMyPurchases(user, elevated);
+
     document.getElementById('signOutBtn').onclick = () => {
       RC.signOut();
       renderForUser();
@@ -746,5 +1019,178 @@ const RC = (function auth() {
     `).join('');
   }
 
+  function renderMyPurchases(user, elevated) {
+    const wrap = document.getElementById('dashPurchases');
+    const list = document.getElementById('dashPurchasesList');
+    if (!wrap || !list) return;
+
+    const all = RC.getPurchases();
+    const mine = elevated ? all : all.filter(p => p.userId === user.id);
+
+    if (mine.length === 0) {
+      list.innerHTML = '<div class="empty-state">No purchases yet — browse the plans page to get started.</div>';
+      return;
+    }
+    list.innerHTML = mine.slice(0, 6).map(p => `
+      <div class="ticket-item">
+        <div class="meta">
+          <span>${p.plan.planName} · ${new Date(p.createdAt).toLocaleDateString()}</span>
+          <span class="tag">${p.status}</span>
+        </div>
+        <div class="body">${p.plan.category} — ₹${p.plan.price}/mo</div>
+        <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="purchase.html?id=${encodeURIComponent(p.id)}">Open chat</a>
+      </div>
+    `).join('');
+  }
+
   renderForUser();
+})();
+
+/* ============================================================
+   7. PURCHASE PAGE — plan summary, Discord tag capture, saved chat
+   ============================================================ */
+(function purchasePage() {
+  const root = document.getElementById('purchaseRoot');
+  if (!root) return;
+
+  const params = new URLSearchParams(location.search);
+  const existingId = params.get('id');
+
+  const gate = document.getElementById('purchaseGate');
+  const summaryCard = document.getElementById('purchaseSummary');
+  const formSection = document.getElementById('purchaseFormSection');
+  const chatSection = document.getElementById('purchaseChatSection');
+
+  const user = RC.currentUser();
+
+  function renderPlanSummary(plan) {
+    summaryCard.innerHTML = `
+      <div class="plan-name">${plan.category}</div>
+      <div class="plan-price">₹${plan.price}<span>/month</span></div>
+      <div class="plan-location">${plan.location || 'Global availability'}</div>
+      <ul class="plan-specs">
+        <li>${plan.ram ? plan.ram + ' RAM' : ''}</li>
+        <li>${plan.storage ? plan.storage + ' NVMe SSD' : ''}</li>
+        <li>${plan.cpu ? 'CPU: ' + plan.cpu : ''}</li>
+        <li>DDoS Protection Included</li>
+      </ul>
+      <div class="plan-name" style="margin-top:6px;">${plan.planName}</div>
+    `;
+  }
+
+  function renderChat(order) {
+    chatSection.style.display = 'block';
+    const thread = document.getElementById('chatThread');
+    if (order.messages.length === 0) {
+      thread.innerHTML = '<div class="empty-state">No messages yet. Say hello — our team will reply here.</div>';
+    } else {
+      thread.innerHTML = order.messages.map(m => `
+        <div class="chat-bubble ${m.sender === 'admin' ? 'admin' : 'user'}">
+          <div class="chat-meta">${m.sender === 'admin' ? 'Range Cloud Support' : m.authorName} · ${new Date(m.at).toLocaleString()}</div>
+          <div class="chat-text">${m.text}</div>
+        </div>
+      `).join('');
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    const statusEl = document.getElementById('chatOrderStatus');
+    if (statusEl) statusEl.textContent = order.status;
+  }
+
+  function bootExisting(id) {
+    const order = RC.getPurchaseById(id);
+    if (!order) {
+      gate.innerHTML = '<div class="form-msg error show">This purchase conversation could not be found in this browser. Saved chats only exist on the device/browser where the purchase was created.</div>';
+      formSection.style.display = 'none';
+      return;
+    }
+    if (!RC.canAccessPurchase(order)) {
+      gate.innerHTML = '<div class="form-msg error show">You do not have access to this conversation. Sign in with the account that created it.</div>';
+      formSection.style.display = 'none';
+      return;
+    }
+    gate.style.display = 'none';
+    formSection.style.display = 'none';
+    renderPlanSummary(order.plan);
+    renderChat(order);
+    wireChatForm(order.id);
+  }
+
+  function wireChatForm(orderId) {
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatMsg = document.getElementById('chatFormMsg');
+    chatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const res = RC.addPurchaseMessage(orderId, chatInput.value);
+      chatMsg.classList.remove('success', 'error');
+      if (res.ok) {
+        chatInput.value = '';
+        renderChat(res.order);
+      } else {
+        chatMsg.textContent = res.error;
+        chatMsg.classList.add('error', 'show');
+      }
+    });
+  }
+
+  if (existingId) {
+    if (!user) {
+      gate.innerHTML = '<div class="form-msg error show">Please sign in to view this purchase conversation.</div><a href="auth.html" class="btn btn-primary btn-block" style="margin-top:10px;">Sign In</a>';
+      formSection.style.display = 'none';
+      return;
+    }
+    bootExisting(existingId);
+    return;
+  }
+
+  // New purchase flow — plan details arrive via query params from plans.html
+  const plan = {
+    category: params.get('category') || 'Range Cloud Hosting',
+    planName: params.get('plan') || 'Custom Plan',
+    price: params.get('price') || '0',
+    ram: params.get('ram') || '',
+    storage: params.get('storage') || '',
+    cpu: params.get('cpu') || '',
+    location: params.get('location') || ''
+  };
+  renderPlanSummary(plan);
+
+  if (!user) {
+    gate.style.display = 'block';
+    gate.innerHTML = '<div class="form-msg error show">Please sign in to continue with this purchase.</div><a href="auth.html#signup" class="btn btn-primary btn-block" style="margin-top:10px;">Sign In / Sign Up</a>';
+    formSection.style.display = 'none';
+    return;
+  }
+
+  gate.style.display = 'none';
+  formSection.style.display = 'block';
+
+  const purchaseForm = document.getElementById('purchaseForm');
+  const discordInput = document.getElementById('purchaseDiscord');
+  const notesInput = document.getElementById('purchaseNotes');
+  const purchaseMsg = document.getElementById('purchaseFormMsg');
+
+  purchaseForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    purchaseMsg.classList.remove('success', 'error');
+
+    if (!RC.discordTagValid(discordInput.value)) {
+      purchaseMsg.textContent = 'Enter a valid Discord username (e.g. yourname or yourname#1234).';
+      purchaseMsg.classList.add('error', 'show');
+      return;
+    }
+
+    const res = RC.submitPurchase({ discordTag: discordInput.value, notes: notesInput.value, plan });
+    if (!res.ok) {
+      purchaseMsg.textContent = res.error;
+      purchaseMsg.classList.add('error', 'show');
+      return;
+    }
+
+    formSection.style.display = 'none';
+    renderChat(res.order);
+    wireChatForm(res.order.id);
+    history.replaceState(null, '', 'purchase.html?id=' + encodeURIComponent(res.order.id));
+  });
 })();
