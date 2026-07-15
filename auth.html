@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In / Sign Up — Range Cloud</title>
+<meta name="description" content="Sign in, create an account, or manage your Range Cloud hosting account.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="starfield" aria-hidden="true"></div>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo" aria-label="Range Cloud home">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle class="node" cx="8" cy="10" r="2.6" fill="#00e0ff"/>
+        <circle class="node" cx="24" cy="8" r="2.6" fill="#2f5bff"/>
+        <circle class="node" cx="16" cy="24" r="2.6" fill="#00e0ff"/>
+        <path d="M8 10L24 8M8 10L16 24M24 8L16 24" stroke="url(#navGrad3)" stroke-width="1.3" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="navGrad3" x1="8" y1="8" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2f5bff"/>
+            <stop offset="1" stop-color="#00e0ff"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="logo-text">Range Cloud</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html#features" data-page="index.html">Features</a>
+      <a href="plans.html" data-page="plans.html">Plans</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#support-section">Support</a>
+    </nav>
+
+    <div class="nav-right">
+      <a class="social-icon" href="https://discord.com" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.369A19.79 19.79 0 0 0 15.885 3c-.22.4-.43.86-.6 1.28a18.27 18.27 0 0 0-5.57 0A11.6 11.6 0 0 0 9.115 3a19.736 19.736 0 0 0-4.432 1.37C1.98 8.19 1.24 11.9 1.55 15.56a19.9 19.9 0 0 0 6.06 3.06c.49-.67.92-1.39 1.29-2.15-.7-.26-1.37-.59-2-.98.17-.12.33-.25.49-.38a14.1 14.1 0 0 0 12.24 0c.16.13.32.26.49.38-.63.39-1.3.72-2 .98.37.76.8 1.48 1.29 2.15a19.83 19.83 0 0 0 6.06-3.06c.36-4.24-.62-7.92-2.65-11.19ZM8.68 13.33c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Zm6.64 0c-.9 0-1.63-.83-1.63-1.85 0-1.02.72-1.85 1.63-1.85.92 0 1.65.84 1.63 1.85 0 1.02-.71 1.85-1.63 1.85Z"/></svg>
+      </a>
+      <a class="social-icon" href="https://youtube.com" target="_blank" rel="noopener noreferrer" aria-label="Watch us on YouTube">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.6 15.5V8.5l6.4 3.5-6.4 3.5Z"/></svg>
+      </a>
+      <div class="nav-account">
+        <a href="auth.html" class="btn btn-ghost btn-sm">Sign In</a>
+        <a href="auth.html#signup" class="btn btn-primary btn-sm">Sign Up</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="page-content">
+<div class="auth-wrap" id="authRoot">
+  <div class="auth-card">
+
+    <div class="auth-tabs" id="authTabs">
+      <button class="auth-tab active" id="tabSignIn" type="button">Sign In</button>
+      <button class="auth-tab" id="tabSignUp" type="button">Sign Up</button>
+    </div>
+
+    <!-- ============ SIGN IN ============ -->
+    <div class="auth-view active" id="viewSignIn">
+      <h2>Welcome back</h2>
+      <p class="sub">Sign in to manage your servers and account.</p>
+
+      <div class="form-msg" id="signInMsg"></div>
+
+      <form id="signInForm" novalidate>
+        <div class="field">
+          <label for="siUsername">Username</label>
+          <input type="text" id="siUsername" name="username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="siPassword">Password</label>
+          <input type="password" id="siPassword" name="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+      </form>
+
+      <div class="auth-switch">
+        Don't have an account? <button type="button" data-switch="signup">Create one</button>
+      </div>
+    </div>
+
+    <!-- ============ SIGN UP ============ -->
+    <div class="auth-view" id="viewSignUp">
+      <h2>Create your account</h2>
+      <p class="sub">Deploy your first server in minutes.</p>
+
+      <div class="form-msg" id="signUpMsg"></div>
+
+      <form id="signUpForm" novalidate>
+        <div class="field">
+          <label for="suUsername">Username</label>
+          <input type="text" id="suUsername" name="username" autocomplete="username" required minlength="3" maxlength="24">
+          <div class="field-hint">3-24 characters. Letters, numbers, and underscores only.</div>
+        </div>
+        <div class="field">
+          <label for="suEmail">Email</label>
+          <input type="email" id="suEmail" name="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="suPassword">Password</label>
+          <input type="password" id="suPassword" name="password" autocomplete="new-password" required minlength="8">
+          <div class="pw-strength"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
+          <div class="field-hint">At least 8 characters, with an uppercase letter, a lowercase letter, and a number.</div>
+        </div>
+        <div class="field">
+          <label for="suConfirm">Confirm password</label>
+          <input type="password" id="suConfirm" name="confirm" autocomplete="new-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+      </form>
+
+      <div class="auth-switch">
+        Already have an account? <button type="button" data-switch="signin">Sign in</button>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div class="auth-view" id="viewDashboard">
+      <div class="dash-header">
+        <div class="avatar" id="dashInitial">R</div>
+        <div>
+          <div class="name" id="dashUsername">—</div>
+          <div class="role" id="dashEmail">—</div>
+          <span class="role-badge user" id="dashRoleBadge">Standard user</span>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-stat">
+          <div class="v" id="dashJoined">—</div>
+          <div class="l">Member since</div>
+        </div>
+        <div class="dash-stat">
+          <div class="v">0</div>
+          <div class="l">Active servers</div>
+        </div>
+      </div>
+
+      <div class="admin-panel" id="dashAdminPanel">
+        <div class="head">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6l-9-4Z"/></svg>
+          Admin Queue Panel
+        </div>
+        <p style="color:var(--text-dim);font-size:0.84rem;margin-bottom:14px;">Visible only to supporter-role accounts and the default admin ID. Open leads from every visitor appear here.</p>
+        <div class="ticket-list" id="dashQueueList"></div>
+      </div>
+
+      <div class="field" style="margin-top:6px;">
+        <button class="btn btn-ghost btn-block" id="signOutBtn">Sign Out</button>
+      </div>
+
+      <div class="danger-zone">
+        <h4>Close account</h4>
+        <p>Permanently deletes your account and access. This cannot be undone.</p>
+        <button class="btn btn-danger btn-block" id="deleteAccountBtn">Delete My Account</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ============ DELETE CONFIRMATION MODAL ============ -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>Delete your account?</h3>
+    <p>This will permanently close your Range Cloud account and sign you out. This action cannot be reversed.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelDelete">Cancel</button>
+      <button class="btn btn-danger" id="confirmDelete">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer page-content">
+  <div class="footer-inner">
+    <div class="footer-col">
+      <a href="index.html" class="logo" style="margin-bottom:12px;">
+        <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="8" cy="10" r="2.6" fill="#00e0ff"/>
+          <circle cx="24" cy="8" r="2.6" fill="#2f5bff"/>
+          <circle cx="16" cy="24" r="2.6" fill="#00e0ff"/>
+          <path d="M8 10L24 8M8 10L16 24M24 8L16 24" stroke="#2f5bff" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">Range Cloud</span>
+      </a>
+      <p style="color:var(--muted);font-size:0.85rem;max-width:260px;">Premium game and application hosting on enterprise hardware.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="plans.html">All Plans</a></li>
+        <li><a href="index.html#features">Features</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Account</h4>
+      <ul>
+        <li><a href="auth.html">Sign In</a></li>
+        <li><a href="auth.html#signup">Sign Up</a></li>
+        <li><a href="auth.html#dashboard">Dashboard</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="https://discord.com" target="_blank" rel="noopener noreferrer">Discord</a></li>
+        <li><a href="https://youtube.com" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Range Cloud. All rights reserved.</span>
+    <span>Optimised for Cloudflare Pages</span>
+  </div>
+</footer>
+
+<!-- ============ SUPPORT WIDGET ============ -->
+<button class="support-launcher" id="supportLauncher" aria-label="Open live support">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6 2 11c0 2.4 1 4.6 2.7 6.2-.2 1.4-.8 2.7-1.7 3.8 1.6 0 3.4-.5 4.9-1.4 1.3.5 2.7.8 4.1.8 5.5 0 10-4 10-9s-4.5-9-10-9Z"/></svg>
+  <span class="ping" id="supportPing"></span>
+</button>
+
+<div class="support-panel" id="supportPanel" role="dialog" aria-label="Live support">
+  <div class="support-header">
+    <div class="title">
+      <span class="dot"></span>
+      <div>
+        <h4>Range Cloud Support</h4>
+        <div class="sub">Typically replies within minutes</div>
+      </div>
+    </div>
+    <button class="support-close" id="supportClose" aria-label="Close support panel">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="support-mode-tabs">
+    <button id="modeTicket" class="active" type="button">Open a Ticket</button>
+    <button id="modeAdmin" type="button" style="display:none;">Admin Queue</button>
+  </div>
+  <div class="support-body">
+    <div id="bodyTicket" class="support-mode-body">
+      <h5>Tell us what's going on</h5>
+      <form id="ticketForm">
+        <textarea id="ticketMessage" placeholder="Describe your issue or question in detail..." required></textarea>
+        <input type="email" id="ticketEmail" placeholder="Contact email (optional)">
+        <button type="submit" class="btn btn-primary btn-block btn-sm">Submit Ticket</button>
+        <div class="form-msg" id="ticketFeedback"></div>
+      </form>
+    </div>
+    <div id="bodyAdmin" class="support-mode-body" style="display:none;">
+      <h5>Open tickets</h5>
+      <div class="ticket-list" id="adminQueueList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
