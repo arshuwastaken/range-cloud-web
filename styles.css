@@ -66,18 +66,86 @@ body {
   position: relative;
 }
 
-/* ---------- Starfield canvas ---------- */
+/* ---------- Starfield canvas + nebula + planet ---------- */
 #starfield {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
   z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(47, 91, 255, 0.16), transparent 60%),
-    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(0, 224, 255, 0.08), transparent 60%),
-    var(--void);
+  background: var(--void);
   pointer-events: none;
+  overflow: hidden;
+}
+
+.nebula-layer {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 42% at 22% 18%, rgba(47, 91, 255, 0.22), transparent 62%),
+    radial-gradient(ellipse 48% 38% at 82% 8%, rgba(0, 224, 255, 0.14), transparent 60%),
+    radial-gradient(ellipse 60% 45% at 68% 85%, rgba(120, 60, 255, 0.10), transparent 65%),
+    radial-gradient(ellipse 40% 40% at 5% 80%, rgba(0, 224, 255, 0.06), transparent 60%);
+  animation: nebula-drift 70s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes nebula-drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.04); }
+  100% { transform: translate3d(2%, -1%, 0) scale(1.02); }
+}
+
+/* ---------- Ringed planet ---------- */
+.planet-wrap {
+  position: absolute;
+  top: -6%;
+  right: -8%;
+  width: min(46vw, 560px);
+  height: min(46vw, 560px);
+  z-index: 0;
+  opacity: 0.92;
+  animation: planet-float 22s ease-in-out infinite;
+  filter: drop-shadow(0 0 60px rgba(47, 91, 255, 0.18));
+}
+
+.planet-svg { width: 100%; height: 100%; overflow: visible; }
+
+#starfield canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.planet-core { transform-origin: 200px 200px; animation: planet-rotate 200s linear infinite; }
+
+@keyframes planet-float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg); }
+  50% { transform: translate3d(-1.4%, 2.2%, 0) rotate(1deg); }
+}
+
+@keyframes planet-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.moon-orbit {
+  transform-origin: 200px 200px;
+  animation: moon-orbit-spin 50s linear infinite;
+}
+
+@keyframes moon-orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 760px) {
+  .planet-wrap { width: 72vw; height: 72vw; top: -10%; right: -20%; opacity: 0.7; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nebula-layer, .planet-wrap, .planet-core { animation: none !important; }
 }
 
 .page-content {
@@ -146,18 +214,11 @@ input, textarea, select { font-family: inherit; }
 }
 
 .logo-mark {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
-}
-
-.logo-mark .node { animation: pulse-node 3.2s ease-in-out infinite; }
-.logo-mark .node:nth-child(2) { animation-delay: 0.5s; }
-.logo-mark .node:nth-child(3) { animation-delay: 1s; }
-
-@keyframes pulse-node {
-  0%, 100% { opacity: 0.5; r: 2.4; }
-  50% { opacity: 1; r: 3.4; }
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(0, 224, 255, 0.25));
 }
 
 .logo-text {
