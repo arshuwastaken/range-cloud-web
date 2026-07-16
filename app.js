@@ -1,16 +1,24 @@
 /* ============================================================
    RANGE CLOUD — Master Application Script
    Vanilla JS. No dependencies.
+
+   Tickets and purchases are now backed by a real Cloudflare Worker
+   API (see worker.js) instead of localStorage, so a customer and
+   an admin on two different devices see the same data. Edit
+   API_BASE below to point at your deployed Worker.
    ============================================================ */
 
 'use strict';
 
+/* Point this at your deployed Worker. If you set up a Worker Route
+   like yourdomain.com/api/* on the same zone as your Pages site,
+   leave this as '/api' — same-origin, no CORS to worry about.
+   Otherwise use your workers.dev URL, e.g.
+   'https://rangecloud-api.yoursubdomain.workers.dev/api' */
+const API_BASE = '/api';
+
 /* ============================================================
    0. PAGE TRANSITIONS + LOADING BAR
-   A thin gradient bar sweeps across the top on every navigation,
-   and the page body cross-fades in/out. Purely cosmetic polish —
-   internal links are intercepted just long enough to play the
-   exit transition, then navigation proceeds normally.
    ============================================================ */
 (function pageTransitions() {
   const bar = document.getElementById('loadingBar');
@@ -47,10 +55,6 @@
 
 /* ============================================================
    1. STARFIELD / NETWORK CANVAS
-   Layered parallax stars, a drifting nebula (handled in CSS),
-   occasional comets, and pointer-driven depth drift — a literal
-   "network forming in the dark" signature tying back to the
-   "powerful network" positioning.
    ============================================================ */
 (function starfield() {
   const canvasHost = document.getElementById('starfield');
@@ -231,51 +235,34 @@
 })();
 
 /* ============================================================
-   2. CORE STATE — auth, tickets, purchases
+   2. CORE STATE
 
-   SECURITY NOTE (read this before deploying live):
-   This entire layer runs on localStorage, which lives only in
-   one visitor's own browser. There is no shared database and no
-   server verifying anything, which means two things in practice:
+   Two separate systems, on purpose:
 
-   1. Nobody can see or tamper with ANOTHER person's account,
-      tickets, or purchases — each browser only ever has its own
-      local copy. A stranger opening dev tools on their own laptop
-      cannot reach your real customer data, because that data was
-      never sent anywhere; it doesn't exist outside the customer's
-      own browser.
-   2. However, ANY visitor can grant themselves the admin UI in
-      THEIR OWN browser by signing up with the reserved admin
-      username, or by editing their own localStorage directly.
-      That unlocks the admin-only panels cosmetically on their
-      screen, but — per point 1 — it does not expose real tickets
-      or purchases belonging to other people, because those never
-      left the other person's browser in the first place.
+   1. LOCAL PROFILE (still localStorage) — username/email/password
+      for personalizing the site (dashboard greeting, "my purchases"
+      shortcuts). This is a convenience layer, not a security
+      boundary. It was never meant to gate access to real data.
 
-   The one real action item on your side: sign up using the
-   reserved admin username yourself, on the live site, before
-   anyone else does — usernames are first-come-first-served per
-   browser/device the way this demo is built. Once an account with
-   that username has your password on your own devices, nobody
-   else can register the same username again on a shared backend
-   (if/when you add one).
-
-   For a real production deployment where staff need to manage
-   real customer tickets and purchases from a different device
-   than the customer used, you need an actual backend (e.g.
-   Cloudflare Workers + D1/KV, with sessions verified server-side)
-   — this file cannot provide that on its own, and no amount of
-   client-side obfuscation changes that.
+   2. LIVE DATA (Cloudflare Worker + KV, see worker.js) — tickets
+      and purchases now live on the server, which is what actually
+      makes cross-device sync and real admin access control
+      possible. Two access mechanisms:
+        - Purchase owners authenticate with a random per-order
+          token issued at creation time (like a magic link).
+        - Staff authenticate with a real password, verified
+          server-side, which returns a signed session token. This
+          cannot be forged from the browser — unlike the old
+          "username === admin" check, the server is the one
+          deciding who's staff now.
    ============================================================ */
 const RC = (function core() {
   const USERS_KEY = 'rc_users';
   const SESSION_KEY = 'rc_session';
-  const TICKETS_KEY = 'rc_tickets';
-  const PURCHASES_KEY = 'rc_purchases';
-  const RATE_KEY = 'rc_rate';
-  const ADMIN_ID = 'lordkira146';
+  const ADMIN_KEY = 'rc_admin';
+  const MY_PURCHASES_KEY = 'rc_my_purchases';
 
-  /* ---------- Low-level storage ---------- */
+  /* ---------- Local profile storage ---------- */
   function getUsers() {
     try { return JSON.parse(localStorage.getItem(USERS_KEY)) || []; }
     catch (e) { return []; }
@@ -289,8 +276,6 @@ const RC = (function core() {
   function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
   function hash(str) {
-    // Lightweight non-cryptographic obfuscation for this client-side demo.
-    // A production system must hash + salt passwords server-side (bcrypt/argon2).
     let h = 0;
     for (let i = 0; i < str.length; i++) {
       h = (h << 5) - h + str.charCodeAt(i);
@@ -305,32 +290,12 @@ const RC = (function core() {
     return div.innerHTML;
   }
 
-  /* ---------- Very simple client-side rate limiting ----------
-     Not a substitute for real server-side rate limiting, but it
-     stops naive spam-clicking of forms in this demo. ---------- */
-  function rateLimited(key, cooldownMs) {
-    try {
-      const store = JSON.parse(localStorage.getItem(RATE_KEY)) || {};
-      const last = store[key] || 0;
-      const now = Date.now();
-      if (now - last < cooldownMs) return true;
-      store[key] = now;
-      localStorage.setItem(RATE_KEY, JSON.stringify(store));
-      return false;
-    } catch (e) { return false; }
+  function emailValid(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim()); }
+  function discordTagValid(tag) {
+    tag = (tag || '').trim();
+    return /^[a-z0-9_.]{2,32}$/.test(tag) || /^.{2,32}#[0-9]{4}$/.test(tag);
   }
 
-  /* ---------- Roles ---------- */
-  function isElevated(idOrUsername, role) {
-    return idOrUsername === ADMIN_ID || role === 'supporter';
-  }
-
-  function resolveRole(username, storedRole) {
-    if (username === ADMIN_ID) return 'supporter';
-    return storedRole || 'user';
-  }
-
-  /* ---------- Auth ---------- */
   function signUp({ username, email, password }) {
     username = (username || '').trim();
     email = (email || '').trim().toLowerCase();
@@ -338,7 +303,7 @@ const RC = (function core() {
     if (username.length < 3 || username.length > 24 || !/^[a-zA-Z0-9_]+$/.test(username)) {
       return { ok: false, error: 'Username must be 3-24 characters (letters, numbers, underscore only).' };
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!emailValid(email)) {
       return { ok: false, error: 'Enter a valid email address.' };
     }
     if (!passwordMeetsPolicy(password)) {
@@ -353,41 +318,30 @@ const RC = (function core() {
       return { ok: false, error: 'An account with that email already exists.' };
     }
 
-    const role = resolveRole(username, 'user');
     const user = {
       id: 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       username,
       email,
       passwordHash: hash(password),
-      role,
       createdAt: new Date().toISOString(),
-      serversActive: 0,
       status: 'active'
     };
     users.push(user);
     saveUsers(users);
-    setSession({ id: user.id, username: user.username, role: user.role, loggedInAt: Date.now() });
+    setSession({ id: user.id, username: user.username, loggedInAt: Date.now() });
     return { ok: true, user };
   }
 
   function signIn({ username, password }) {
     username = (username || '').trim();
-    if (!username || !password) {
-      return { ok: false, error: 'Enter your username and password.' };
-    }
-    if (rateLimited('signin:' + username.toLowerCase(), 800)) {
-      return { ok: false, error: 'Too many attempts — wait a moment and try again.' };
-    }
+    if (!username || !password) return { ok: false, error: 'Enter your username and password.' };
     const users = getUsers();
     const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user || user.passwordHash !== hash(password)) {
       return { ok: false, error: 'Incorrect username or password.' };
     }
-    if (user.status === 'deleted') {
-      return { ok: false, error: 'This account has been closed.' };
-    }
-    const role = resolveRole(user.username, user.role);
-    setSession({ id: user.id, username: user.username, role, loggedInAt: Date.now() });
+    if (user.status === 'deleted') return { ok: false, error: 'This account has been closed.' };
+    setSession({ id: user.id, username: user.username, loggedInAt: Date.now() });
     return { ok: true, user };
   }
 
@@ -398,18 +352,8 @@ const RC = (function core() {
     if (!sess) return null;
     const users = getUsers();
     const stored = users.find(u => u.id === sess.id);
-    if (!stored || stored.status === 'deleted') {
-      clearSession();
-      return null;
-    }
-    return {
-      id: stored.id,
-      username: stored.username,
-      email: stored.email,
-      role: resolveRole(stored.username, stored.role),
-      createdAt: stored.createdAt,
-      serversActive: stored.serversActive || 0
-    };
+    if (!stored || stored.status === 'deleted') { clearSession(); return null; }
+    return { id: stored.id, username: stored.username, email: stored.email, createdAt: stored.createdAt };
   }
 
   function deleteAccount(id) {
@@ -442,170 +386,125 @@ const RC = (function core() {
     return Math.min(score, 5);
   }
 
-  function discordTagValid(tag) {
-    tag = (tag || '').trim();
-    // Accepts modern unique usernames (2-32 chars, lowercase/digits/._) or legacy Name#1234
-    return /^[a-z0-9_.]{2,32}$/.test(tag) || /^.{2,32}#[0-9]{4}$/.test(tag);
-  }
-
-  /* ---------- Tickets (general support) ---------- */
-  function getTickets() {
-    try { return JSON.parse(localStorage.getItem(TICKETS_KEY)) || []; }
-    catch (e) { return []; }
-  }
-  function saveTickets(tickets) { localStorage.setItem(TICKETS_KEY, JSON.stringify(tickets)); }
-
-  function submitTicket({ message, contactEmail }) {
-    message = (message || '').trim();
-    if (message.length < 10) {
-      return { ok: false, error: 'Please describe your issue in at least 10 characters.' };
+  /* ---------- API helper ---------- */
+  async function api(path, opts = {}) {
+    let res, data;
+    try {
+      res = await fetch(API_BASE + path, {
+        method: opts.method || 'GET',
+        headers: { 'Content-Type': 'application/json', ...adminHeaders(), ...(opts.headers || {}) },
+        body: opts.body ? JSON.stringify(opts.body) : undefined
+      });
+    } catch (e) {
+      return { ok: false, error: 'Could not reach the server. Check your connection and try again.' };
     }
-    if (message.length > 1500) {
-      return { ok: false, error: 'Message is too long (max 1500 characters).' };
+    try { data = await res.json(); }
+    catch (e) { return { ok: false, error: 'Unexpected server response.' }; }
+    if (!res.ok && data.ok === undefined) return { ok: false, error: data.error || 'Request failed.' };
+    return data;
+  }
+
+  /* ---------- Admin (staff) session ---------- */
+  function getAdmin() {
+    try {
+      const a = JSON.parse(localStorage.getItem(ADMIN_KEY));
+      if (a && a.expiresAt > Date.now()) return a;
+      return null;
+    } catch (e) { return null; }
+  }
+  function isAdminSession() { return !!getAdmin(); }
+  function getStaffName() { const a = getAdmin(); return a ? a.staffName : null; }
+  function adminHeaders() {
+    const a = getAdmin();
+    return a ? { Authorization: 'Bearer ' + a.token } : {};
+  }
+  async function adminLogin(password, staffName) {
+    const res = await api('/admin/login', { method: 'POST', body: { password, staffName } });
+    if (res.ok) {
+      localStorage.setItem(ADMIN_KEY, JSON.stringify({
+        token: res.token,
+        staffName: res.staffName,
+        expiresAt: Date.now() + res.expiresInMs
+      }));
     }
-    if (rateLimited('ticket', 4000)) {
-      return { ok: false, error: 'Please wait a few seconds before sending another ticket.' };
-    }
-    const sess = getSession();
-    const tickets = getTickets();
-    const ticket = {
-      id: 't_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      message: sanitize(message),
-      contactEmail: contactEmail ? sanitize(contactEmail) : null,
-      username: sess ? sess.username : 'Guest',
-      createdAt: new Date().toISOString(),
-      status: 'open'
-    };
-    tickets.unshift(ticket);
-    saveTickets(tickets);
-    return { ok: true, ticket };
+    return res;
   }
-  function closeTicket(id) {
-    const tickets = getTickets();
-    const t = tickets.find(t => t.id === id);
-    if (t) t.status = 'closed';
-    saveTickets(tickets);
-  }
+  function adminLogout() { localStorage.removeItem(ADMIN_KEY); }
 
-  /* ---------- Purchases (plan orders + saved chat thread) ----------
-     Chat persists in localStorage, which — per the note above —
-     only exists inside the browser it was created in. Treat this
-     as a working local demo of the flow, not a live cross-device
-     support inbox, until a real backend is wired in. ---------- */
-  function getPurchases() {
-    try { return JSON.parse(localStorage.getItem(PURCHASES_KEY)) || []; }
-    catch (e) { return []; }
-  }
-  function savePurchases(list) { localStorage.setItem(PURCHASES_KEY, JSON.stringify(list)); }
-
-  function getPurchaseById(id) {
-    return getPurchases().find(p => p.id === id) || null;
-  }
-
-  function submitPurchase({ discordTag, notes, plan }) {
+  /* ---------- Tickets ---------- */
+  function createTicket({ message, contactEmail }) {
     const user = currentUser();
-    if (!user) {
-      return { ok: false, error: 'Please sign in before starting a purchase.' };
-    }
-    discordTag = (discordTag || '').trim();
-    if (!discordTagValid(discordTag)) {
-      return { ok: false, error: 'Enter a valid Discord username (e.g. yourname or yourname#1234).' };
-    }
-    if (!plan || !plan.planName || !plan.price) {
-      return { ok: false, error: 'Missing plan details — go back and choose a plan again.' };
-    }
-    if (rateLimited('purchase', 4000)) {
-      return { ok: false, error: 'Please wait a few seconds before submitting again.' };
-    }
-
-    const purchases = getPurchases();
-    const order = {
-      id: 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      userId: user.id,
-      username: user.username,
-      discordTag: sanitize(discordTag),
-      plan: {
-        category: sanitize(plan.category || ''),
-        planName: sanitize(plan.planName || ''),
-        price: sanitize(String(plan.price || '')),
-        ram: sanitize(plan.ram || ''),
-        storage: sanitize(plan.storage || ''),
-        cpu: sanitize(plan.cpu || ''),
-        location: sanitize(plan.location || '')
-      },
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      messages: notes ? [{
-        id: 'm_' + Date.now().toString(36),
-        sender: 'user',
-        authorName: user.username,
-        text: sanitize(notes.trim()),
-        at: new Date().toISOString()
-      }] : []
-    };
-    purchases.unshift(order);
-    savePurchases(purchases);
-    return { ok: true, order };
-  }
-
-  function addPurchaseMessage(id, text) {
-    text = (text || '').trim();
-    if (!text) return { ok: false, error: 'Message cannot be empty.' };
-    if (text.length > 1000) return { ok: false, error: 'Message is too long (max 1000 characters).' };
-
-    const user = currentUser();
-    if (!user) return { ok: false, error: 'Sign in required.' };
-
-    const purchases = getPurchases();
-    const order = purchases.find(p => p.id === id);
-    if (!order) return { ok: false, error: 'Order not found.' };
-
-    const elevated = isElevated(user.username, user.role);
-    const isOwner = order.userId === user.id;
-    if (!elevated && !isOwner) {
-      return { ok: false, error: 'You do not have access to this conversation.' };
-    }
-
-    order.messages.push({
-      id: 'm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-      sender: elevated && !isOwner ? 'admin' : (elevated && isOwner ? 'admin' : 'user'),
-      authorName: user.username,
-      text: sanitize(text),
-      at: new Date().toISOString()
+    return api('/tickets', {
+      method: 'POST',
+      body: { message, contactEmail, username: user ? user.username : 'Guest' }
     });
-    savePurchases(purchases);
-    return { ok: true, order };
+  }
+  function listTickets() { return api('/tickets'); }
+  function claimTicket(id) { return api(`/tickets/${id}/claim`, { method: 'POST' }); }
+  function resolveTicket(id) { return api(`/tickets/${id}/resolve`, { method: 'POST' }); }
+  function deleteTicket(id) { return api(`/tickets/${id}`, { method: 'DELETE' }); }
+
+  /* ---------- Purchases ---------- */
+  function rememberMyPurchase(id, token, planName) {
+    try {
+      const list = JSON.parse(localStorage.getItem(MY_PURCHASES_KEY)) || [];
+      list.unshift({ id, token, planName, savedAt: Date.now() });
+      localStorage.setItem(MY_PURCHASES_KEY, JSON.stringify(list.slice(0, 30)));
+    } catch (e) { /* ignore */ }
+  }
+  function getMyPurchaseRefs() {
+    try { return JSON.parse(localStorage.getItem(MY_PURCHASES_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  function forgetMyPurchase(id) {
+    const list = getMyPurchaseRefs().filter(p => p.id !== id);
+    localStorage.setItem(MY_PURCHASES_KEY, JSON.stringify(list));
   }
 
-  function setPurchaseStatus(id, status) {
-    const purchases = getPurchases();
-    const order = purchases.find(p => p.id === id);
-    if (!order) return { ok: false, error: 'Order not found.' };
-    order.status = status;
-    savePurchases(purchases);
-    return { ok: true, order };
-  }
-
-  function canAccessPurchase(order) {
+  async function createPurchase({ discordTag, email, notes, plan }) {
     const user = currentUser();
-    if (!user) return false;
-    return isElevated(user.username, user.role) || order.userId === user.id;
+    const res = await api('/purchases', {
+      method: 'POST',
+      body: { discordTag, email, notes, plan, username: user ? user.username : 'Guest' }
+    });
+    if (res.ok) rememberMyPurchase(res.id, res.token, plan.planName);
+    return res;
+  }
+  function getPurchase(id, token) {
+    const qs = token ? `?token=${encodeURIComponent(token)}` : '';
+    return api(`/purchases/${id}${qs}`);
+  }
+  function addPurchaseMessage(id, token, text) {
+    return api(`/purchases/${id}/messages`, { method: 'POST', body: { token, text } });
+  }
+  function listPurchases() { return api('/purchases'); }
+  function claimPurchase(id) { return api(`/purchases/${id}/claim`, { method: 'POST', body: {} }); }
+  function cancelPurchase(id, token) { return api(`/purchases/${id}/cancel`, { method: 'POST', body: { token } }); }
+  function deletePurchase(id) { return api(`/purchases/${id}`, { method: 'DELETE' }); }
+
+  async function getMyPurchases() {
+    const refs = getMyPurchaseRefs();
+    const results = await Promise.all(refs.map(async (r) => {
+      const res = await getPurchase(r.id, r.token);
+      return res.ok ? { ...res.order, _token: r.token } : null;
+    }));
+    return results.filter(Boolean);
   }
 
   return {
-    ADMIN_ID,
     signUp, signIn, signOut, currentUser, deleteAccount,
-    passwordMeetsPolicy, passwordStrength, discordTagValid,
-    isElevated,
-    submitTicket, getTickets, closeTicket,
-    getPurchases, getPurchaseById, submitPurchase, addPurchaseMessage,
-    setPurchaseStatus, canAccessPurchase,
+    passwordMeetsPolicy, passwordStrength, discordTagValid, emailValid,
+    isAdminSession, getStaffName, adminLogin, adminLogout,
+    createTicket, listTickets, claimTicket, resolveTicket, deleteTicket,
+    createPurchase, getPurchase, addPurchaseMessage, listPurchases,
+    claimPurchase, cancelPurchase, deletePurchase,
+    getMyPurchaseRefs, getMyPurchases, forgetMyPurchase,
     sanitize
   };
 })();
 
 /* ============================================================
-   3. NAVBAR — active link, mobile toggle, session-aware buttons
+   3. NAVBAR
    ============================================================ */
 (function navbar() {
   const toggle = document.querySelector('.nav-toggle');
@@ -649,10 +548,8 @@ const RC = (function core() {
 })();
 
 /* ============================================================
-   4. SUPPORT WIDGET — visible on every page
-   Three modes: Ticket (everyone), Support Queue (admin), and
-   Purchases (admin) — the new section after Support, where staff
-   reply into a purchase's saved chat thread.
+   4. SUPPORT WIDGET — Ticket / Support Queue / Purchases
+   The latter two require staff sign-in (real, server-verified).
    ============================================================ */
 (function supportWidget() {
   const launcher = document.getElementById('supportLauncher');
@@ -674,37 +571,68 @@ const RC = (function core() {
   const purchasesQueueList = document.getElementById('adminPurchasesList');
   const pingBadge = launcher.querySelector('.ping');
 
-  function refreshAccess() {
-    const user = RC.currentUser();
-    const elevated = user && RC.isElevated(user.username, user.role);
-    if (modeAdmin) modeAdmin.style.display = elevated ? 'block' : 'none';
-    if (modePurchases) modePurchases.style.display = elevated ? 'block' : 'none';
+  function loginFormHtml(context) {
+    return `
+      <div class="staff-login">
+        <h5>Staff sign-in</h5>
+        <p class="field-hint" style="margin-bottom:14px;">Server-verified — this is not the same as a customer account.</p>
+        <div class="form-msg" id="staffLoginMsg-${context}"></div>
+        <div class="field">
+          <label>Staff name</label>
+          <input type="text" id="staffName-${context}" placeholder="Shown to customers in chat">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="staffPassword-${context}">
+        </div>
+        <button class="btn btn-primary btn-block btn-sm" id="staffLoginBtn-${context}">Sign In</button>
+      </div>
+    `;
+  }
 
-    if (!elevated) {
-      if (bodyAdmin && bodyAdmin.classList.contains('active')) switchMode('ticket');
-      if (bodyPurchases && bodyPurchases.classList.contains('active')) switchMode('ticket');
-    }
-
-    if (elevated) {
-      const openTickets = RC.getTickets().filter(t => t.status === 'open').length;
-      const openPurchases = RC.getPurchases().filter(p => p.status === 'pending').length;
-      const total = openTickets + openPurchases;
-      if (total > 0) {
-        pingBadge.classList.add('show');
-        pingBadge.textContent = total > 9 ? '9+' : String(total);
+  function wireLoginForm(context, onSuccess) {
+    const btn = document.getElementById(`staffLoginBtn-${context}`);
+    const msg = document.getElementById(`staffLoginMsg-${context}`);
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const password = document.getElementById(`staffPassword-${context}`).value;
+      const staffName = document.getElementById(`staffName-${context}`).value;
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+      const res = await RC.adminLogin(password, staffName);
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+      msg.classList.remove('success', 'error');
+      if (res.ok) {
+        onSuccess();
+        refreshAccess();
       } else {
-        pingBadge.classList.remove('show');
+        msg.textContent = res.error;
+        msg.classList.add('error', 'show');
       }
+    });
+  }
+
+  function refreshAccess() {
+    // Both admin tabs are always visible — access is gated by a
+    // real staff sign-in prompt inside, not by hiding the tab.
+  }
+
+  async function refreshPing() {
+    if (!RC.isAdminSession()) { pingBadge.classList.remove('show'); return; }
+    const [t, p] = await Promise.all([RC.listTickets(), RC.listPurchases()]);
+    let total = 0;
+    if (t.ok) total += t.tickets.filter(x => x.status === 'open').length;
+    if (p.ok) total += p.purchases.filter(x => x.status === 'pending').length;
+    if (total > 0) {
+      pingBadge.classList.add('show');
+      pingBadge.textContent = total > 9 ? '9+' : String(total);
     } else {
       pingBadge.classList.remove('show');
     }
-    return elevated;
   }
 
   function switchMode(mode) {
-    const elevated = refreshAccess();
-    if ((mode === 'admin' || mode === 'purchases') && !elevated) mode = 'ticket';
-
     modeTicket.classList.toggle('active', mode === 'ticket');
     if (modeAdmin) modeAdmin.classList.toggle('active', mode === 'admin');
     if (modePurchases) modePurchases.classList.toggle('active', mode === 'purchases');
@@ -717,9 +645,21 @@ const RC = (function core() {
     if (mode === 'purchases') renderPurchasesQueue();
   }
 
-  function renderQueue() {
+  async function renderQueue() {
     if (!queueList) return;
-    const tickets = RC.getTickets();
+    if (!RC.isAdminSession()) {
+      queueList.innerHTML = loginFormHtml('tickets');
+      wireLoginForm('tickets', renderQueue);
+      return;
+    }
+    queueList.innerHTML = '<div class="empty-state">Loading...</div>';
+    const res = await RC.listTickets();
+    if (!res.ok) {
+      queueList.innerHTML = `<div class="empty-state">${res.error}</div>`;
+      if (res.error && res.error.includes('sign-in')) { RC.adminLogout(); renderQueue(); }
+      return;
+    }
+    const tickets = res.tickets;
     if (tickets.length === 0) {
       queueList.innerHTML = '<div class="empty-state">No tickets yet. New leads will appear here in real time.</div>';
       return;
@@ -728,27 +668,51 @@ const RC = (function core() {
       <div class="ticket-item" data-id="${t.id}">
         <div class="meta">
           <span>${t.username} · ${new Date(t.createdAt).toLocaleString()}</span>
-          <span class="tag">${t.status}</span>
+          <span class="tag">${t.status}${t.claimedBy ? ' · ' + t.claimedBy : ''}</span>
         </div>
         <div class="body">${t.message}</div>
         ${t.contactEmail ? `<div class="field-hint">Contact: ${t.contactEmail}</div>` : ''}
-        ${t.status === 'open' ? `<button class="btn btn-ghost btn-sm resolve-btn" style="margin-top:8px;">Mark resolved</button>` : ''}
+        <div class="ticket-actions">
+          ${t.status === 'open' && !t.claimedBy ? '<button class="btn btn-ghost btn-sm claim-btn">Claim</button>' : ''}
+          ${t.status !== 'resolved' ? '<button class="btn btn-ghost btn-sm resolve-btn">Mark resolved</button>' : ''}
+          <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+        </div>
       </div>
     `).join('');
 
-    queueList.querySelectorAll('.resolve-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const id = e.target.closest('.ticket-item').dataset.id;
-        RC.closeTicket(id);
-        renderQueue();
-        refreshAccess();
-      });
-    });
+    queueList.querySelectorAll('.claim-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+      const id = e.target.closest('.ticket-item').dataset.id;
+      await RC.claimTicket(id);
+      renderQueue(); refreshPing();
+    }));
+    queueList.querySelectorAll('.resolve-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+      const id = e.target.closest('.ticket-item').dataset.id;
+      await RC.resolveTicket(id);
+      renderQueue(); refreshPing();
+    }));
+    queueList.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+      const id = e.target.closest('.ticket-item').dataset.id;
+      if (!confirm('Delete this ticket permanently?')) return;
+      await RC.deleteTicket(id);
+      renderQueue(); refreshPing();
+    }));
   }
 
-  function renderPurchasesQueue() {
+  async function renderPurchasesQueue() {
     if (!purchasesQueueList) return;
-    const purchases = RC.getPurchases();
+    if (!RC.isAdminSession()) {
+      purchasesQueueList.innerHTML = loginFormHtml('purchases');
+      wireLoginForm('purchases', renderPurchasesQueue);
+      return;
+    }
+    purchasesQueueList.innerHTML = '<div class="empty-state">Loading...</div>';
+    const res = await RC.listPurchases();
+    if (!res.ok) {
+      purchasesQueueList.innerHTML = `<div class="empty-state">${res.error}</div>`;
+      if (res.error && res.error.includes('sign-in')) { RC.adminLogout(); renderPurchasesQueue(); }
+      return;
+    }
+    const purchases = res.purchases;
     if (purchases.length === 0) {
       purchasesQueueList.innerHTML = '<div class="empty-state">No purchase requests yet.</div>';
       return;
@@ -757,18 +721,34 @@ const RC = (function core() {
       <div class="ticket-item" data-id="${p.id}">
         <div class="meta">
           <span>${p.username} · ${new Date(p.createdAt).toLocaleString()}</span>
-          <span class="tag">${p.status}</span>
+          <span class="tag">${p.status}${p.claimedBy ? ' · ' + p.claimedBy : ''}</span>
         </div>
         <div class="body"><strong>${p.plan.planName}</strong> — ${p.plan.category} — ₹${p.plan.price}/mo</div>
-        <div class="field-hint">Discord: ${p.discordTag}</div>
-        <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="purchase.html?id=${encodeURIComponent(p.id)}">Open chat</a>
+        <div class="field-hint">Discord: ${p.discordTag} · Email: ${p.email}</div>
+        <div class="ticket-actions">
+          ${!p.claimedBy ? '<button class="btn btn-ghost btn-sm claim-btn">Claim</button>' : ''}
+          <a class="btn btn-ghost btn-sm" href="purchase.html?id=${encodeURIComponent(p.id)}">Open chat</a>
+          <button class="btn btn-danger btn-sm delete-btn">Delete</button>
+        </div>
       </div>
     `).join('');
+
+    purchasesQueueList.querySelectorAll('.claim-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+      const id = e.target.closest('.ticket-item').dataset.id;
+      await RC.claimPurchase(id);
+      renderPurchasesQueue(); refreshPing();
+    }));
+    purchasesQueueList.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', async (e) => {
+      const id = e.target.closest('.ticket-item').dataset.id;
+      if (!confirm('Delete this purchase request permanently?')) return;
+      await RC.deletePurchase(id);
+      renderPurchasesQueue(); refreshPing();
+    }));
   }
 
   launcher.addEventListener('click', () => {
     panel.classList.add('show');
-    refreshAccess();
+    refreshPing();
   });
   closeBtn.addEventListener('click', () => panel.classList.remove('show'));
   document.addEventListener('click', (e) => {
@@ -782,15 +762,18 @@ const RC = (function core() {
   if (modePurchases) modePurchases.addEventListener('click', () => switchMode('purchases'));
 
   if (ticketForm) {
-    ticketForm.addEventListener('submit', (e) => {
+    ticketForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const res = RC.submitTicket({ message: ticketMsg.value, contactEmail: ticketEmail.value });
+      const submitBtn = ticketForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      const res = await RC.createTicket({ message: ticketMsg.value, contactEmail: ticketEmail.value });
+      submitBtn.disabled = false;
       ticketFeedback.classList.remove('success', 'error');
       if (res.ok) {
         ticketFeedback.textContent = 'Ticket submitted — our team will follow up shortly.';
         ticketFeedback.classList.add('success', 'show');
         ticketForm.reset();
-        refreshAccess();
+        refreshPing();
       } else {
         ticketFeedback.textContent = res.error;
         ticketFeedback.classList.add('error', 'show');
@@ -798,16 +781,12 @@ const RC = (function core() {
     });
   }
 
-  refreshAccess();
+  refreshPing();
   switchMode('ticket');
 })();
 
 /* ============================================================
    5. PLANS PAGE — tab filtering
-   Supports two entry modes via ?type= query param:
-     ?type=minecraft -> only Intel / Epyc / Ryzen7 / Ryzen9 tabs
-     ?type=other     -> only the Discord Bot Hosting tab
-   No param (e.g. from the main "Plans" nav link) shows everything.
    ============================================================ */
 (function plansTabs() {
   const tabs = document.querySelectorAll('.tab-btn');
@@ -823,10 +802,10 @@ const RC = (function core() {
       const show = type === 'minecraft' ? !isDiscord : isDiscord;
       tab.style.display = show ? '' : 'none';
     });
-    panels.forEach(panel => {
-      const isDiscord = panel.id === 'discord-bots';
+    panels.forEach(panelEl => {
+      const isDiscord = panelEl.id === 'discord-bots';
       const show = type === 'minecraft' ? !isDiscord : isDiscord;
-      if (!show) panel.classList.remove('active');
+      if (!show) panelEl.classList.remove('active');
     });
     const firstVisible = Array.from(tabs).find(t => t.style.display !== 'none');
     if (firstVisible && !document.getElementById(firstVisible.dataset.target).classList.contains('active')) {
@@ -903,7 +882,6 @@ const RC = (function core() {
     });
   });
 
-  /* ---------- Sign In ---------- */
   const signInForm = document.getElementById('signInForm');
   const signInMsg = document.getElementById('signInMsg');
   signInForm.addEventListener('submit', (e) => {
@@ -922,7 +900,6 @@ const RC = (function core() {
     }
   });
 
-  /* ---------- Sign Up ---------- */
   const signUpForm = document.getElementById('signUpForm');
   const signUpMsg = document.getElementById('signUpMsg');
   const suPassword = document.getElementById('suPassword');
@@ -962,27 +939,28 @@ const RC = (function core() {
     }
   });
 
-  /* ---------- Dashboard ---------- */
   function renderDashboard(user) {
-    const elevated = RC.isElevated(user.username, user.role);
     document.getElementById('dashInitial').textContent = user.username.charAt(0).toUpperCase();
     document.getElementById('dashUsername').textContent = user.username;
     document.getElementById('dashEmail').textContent = user.email;
     document.getElementById('dashJoined').textContent = new Date(user.createdAt).toLocaleDateString();
 
     const roleBadge = document.getElementById('dashRoleBadge');
-    roleBadge.textContent = elevated ? 'Supporter' : 'Standard user';
-    roleBadge.className = 'role-badge ' + (elevated ? 'supporter' : 'user');
+    const staff = RC.isAdminSession();
+    roleBadge.textContent = staff ? `Staff (${RC.getStaffName()})` : 'Standard user';
+    roleBadge.className = 'role-badge ' + (staff ? 'supporter' : 'user');
 
-    const adminPanel = document.getElementById('dashAdminPanel');
-    if (elevated) {
-      adminPanel.classList.add('show');
-      renderDashQueue();
-    } else {
-      adminPanel.classList.remove('show');
+    const staffTools = document.getElementById('dashStaffTools');
+    if (staffTools) staffTools.style.display = staff ? 'block' : 'none';
+    const openWidgetBtn = document.getElementById('openSupportWidgetBtn');
+    if (openWidgetBtn) {
+      openWidgetBtn.onclick = () => {
+        document.getElementById('supportLauncher')?.click();
+        document.getElementById('modeAdmin')?.click();
+      };
     }
 
-    renderMyPurchases(user, elevated);
+    renderMyPurchases();
 
     document.getElementById('signOutBtn').onclick = () => {
       RC.signOut();
@@ -1003,42 +981,23 @@ const RC = (function core() {
     };
   }
 
-  function renderDashQueue() {
-    const list = document.getElementById('dashQueueList');
-    const tickets = RC.getTickets();
-    if (!list) return;
-    if (tickets.length === 0) {
-      list.innerHTML = '<div class="empty-state">Queue is empty.</div>';
-      return;
-    }
-    list.innerHTML = tickets.slice(0, 5).map(t => `
-      <div class="ticket-item">
-        <div class="meta"><span>${t.username} · ${new Date(t.createdAt).toLocaleString()}</span><span class="tag">${t.status}</span></div>
-        <div class="body">${t.message}</div>
-      </div>
-    `).join('');
-  }
-
-  function renderMyPurchases(user, elevated) {
-    const wrap = document.getElementById('dashPurchases');
+  async function renderMyPurchases() {
     const list = document.getElementById('dashPurchasesList');
-    if (!wrap || !list) return;
-
-    const all = RC.getPurchases();
-    const mine = elevated ? all : all.filter(p => p.userId === user.id);
-
+    if (!list) return;
+    list.innerHTML = '<div class="empty-state">Loading...</div>';
+    const mine = await RC.getMyPurchases();
     if (mine.length === 0) {
       list.innerHTML = '<div class="empty-state">No purchases yet — browse the plans page to get started.</div>';
       return;
     }
-    list.innerHTML = mine.slice(0, 6).map(p => `
+    list.innerHTML = mine.map(p => `
       <div class="ticket-item">
         <div class="meta">
           <span>${p.plan.planName} · ${new Date(p.createdAt).toLocaleDateString()}</span>
           <span class="tag">${p.status}</span>
         </div>
         <div class="body">${p.plan.category} — ₹${p.plan.price}/mo</div>
-        <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="purchase.html?id=${encodeURIComponent(p.id)}">Open chat</a>
+        <a class="btn btn-ghost btn-sm" style="margin-top:8px;" href="purchase.html?id=${encodeURIComponent(p.id)}&token=${encodeURIComponent(p._token)}">Open chat</a>
       </div>
     `).join('');
   }
@@ -1047,7 +1006,7 @@ const RC = (function core() {
 })();
 
 /* ============================================================
-   7. PURCHASE PAGE — plan summary, Discord tag capture, saved chat
+   7. PURCHASE PAGE — plan summary, Discord + email capture, chat
    ============================================================ */
 (function purchasePage() {
   const root = document.getElementById('purchaseRoot');
@@ -1055,13 +1014,13 @@ const RC = (function core() {
 
   const params = new URLSearchParams(location.search);
   const existingId = params.get('id');
+  const urlToken = params.get('token');
 
   const gate = document.getElementById('purchaseGate');
   const summaryCard = document.getElementById('purchaseSummary');
   const formSection = document.getElementById('purchaseFormSection');
   const chatSection = document.getElementById('purchaseChatSection');
-
-  const user = RC.currentUser();
+  const linkBox = document.getElementById('trackingLinkBox');
 
   function renderPlanSummary(plan) {
     summaryCard.innerHTML = `
@@ -1069,16 +1028,16 @@ const RC = (function core() {
       <div class="plan-price">₹${plan.price}<span>/month</span></div>
       <div class="plan-location">${plan.location || 'Global availability'}</div>
       <ul class="plan-specs">
-        <li>${plan.ram ? plan.ram + ' RAM' : ''}</li>
-        <li>${plan.storage ? plan.storage + ' NVMe SSD' : ''}</li>
-        <li>${plan.cpu ? 'CPU: ' + plan.cpu : ''}</li>
+        ${plan.ram ? `<li>${plan.ram} RAM</li>` : ''}
+        ${plan.storage ? `<li>${plan.storage} NVMe SSD</li>` : ''}
+        ${plan.cpu ? `<li>CPU: ${plan.cpu}</li>` : ''}
         <li>DDoS Protection Included</li>
       </ul>
       <div class="plan-name" style="margin-top:6px;">${plan.planName}</div>
     `;
   }
 
-  function renderChat(order) {
+  function renderChat(order, token) {
     chatSection.style.display = 'block';
     const thread = document.getElementById('chatThread');
     if (order.messages.length === 0) {
@@ -1086,7 +1045,7 @@ const RC = (function core() {
     } else {
       thread.innerHTML = order.messages.map(m => `
         <div class="chat-bubble ${m.sender === 'admin' ? 'admin' : 'user'}">
-          <div class="chat-meta">${m.sender === 'admin' ? 'Range Cloud Support' : m.authorName} · ${new Date(m.at).toLocaleString()}</div>
+          <div class="chat-meta">${m.sender === 'admin' ? m.authorName + ' (Support)' : m.authorName} · ${new Date(m.at).toLocaleString()}</div>
           <div class="chat-text">${m.text}</div>
         </div>
       `).join('');
@@ -1095,38 +1054,56 @@ const RC = (function core() {
 
     const statusEl = document.getElementById('chatOrderStatus');
     if (statusEl) statusEl.textContent = order.status;
+
+    const isAdmin = RC.isAdminSession();
+    const isOwner = !!token;
+    const actionsEl = document.getElementById('chatActions');
+    const actions = [];
+    if (isAdmin && !order.claimedBy) actions.push('<button class="btn btn-ghost btn-sm" id="claimOrderBtn">Claim</button>');
+    if ((isAdmin || isOwner) && order.status !== 'cancelled' && order.status !== 'completed') {
+      actions.push('<button class="btn btn-danger btn-sm" id="cancelOrderBtn">Cancel Order</button>');
+    }
+    if (isAdmin) actions.push('<button class="btn btn-danger btn-sm" id="deleteOrderBtn">Delete</button>');
+    actionsEl.innerHTML = actions.join('');
+
+    const claimBtn = document.getElementById('claimOrderBtn');
+    if (claimBtn) claimBtn.addEventListener('click', async () => {
+      claimBtn.disabled = true;
+      const res = await RC.claimPurchase(order.id);
+      if (res.ok) renderChat(res.order, token);
+    });
+    const cancelBtn = document.getElementById('cancelOrderBtn');
+    if (cancelBtn) cancelBtn.addEventListener('click', async () => {
+      if (!confirm('Cancel this order?')) return;
+      cancelBtn.disabled = true;
+      const res = await RC.cancelPurchase(order.id, token);
+      if (res.ok) renderChat(res.order, token);
+    });
+    const deleteBtn = document.getElementById('deleteOrderBtn');
+    if (deleteBtn) deleteBtn.addEventListener('click', async () => {
+      if (!confirm('Delete this order permanently? This cannot be undone.')) return;
+      const res = await RC.deletePurchase(order.id);
+      if (res.ok) {
+        RC.forgetMyPurchase(order.id);
+        chatSection.innerHTML = '<div class="empty-state">This order was deleted.</div>';
+      }
+    });
   }
 
-  function bootExisting(id) {
-    const order = RC.getPurchaseById(id);
-    if (!order) {
-      gate.innerHTML = '<div class="form-msg error show">This purchase conversation could not be found in this browser. Saved chats only exist on the device/browser where the purchase was created.</div>';
-      formSection.style.display = 'none';
-      return;
-    }
-    if (!RC.canAccessPurchase(order)) {
-      gate.innerHTML = '<div class="form-msg error show">You do not have access to this conversation. Sign in with the account that created it.</div>';
-      formSection.style.display = 'none';
-      return;
-    }
-    gate.style.display = 'none';
-    formSection.style.display = 'none';
-    renderPlanSummary(order.plan);
-    renderChat(order);
-    wireChatForm(order.id);
-  }
-
-  function wireChatForm(orderId) {
+  function wireChatForm(orderId, token) {
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
     const chatMsg = document.getElementById('chatFormMsg');
-    chatForm.addEventListener('submit', (e) => {
+    chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const res = RC.addPurchaseMessage(orderId, chatInput.value);
+      const btn = chatForm.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      const res = await RC.addPurchaseMessage(orderId, token, chatInput.value);
+      btn.disabled = false;
       chatMsg.classList.remove('success', 'error');
       if (res.ok) {
         chatInput.value = '';
-        renderChat(res.order);
+        renderChat(res.order, token);
       } else {
         chatMsg.textContent = res.error;
         chatMsg.classList.add('error', 'show');
@@ -1134,17 +1111,31 @@ const RC = (function core() {
     });
   }
 
-  if (existingId) {
-    if (!user) {
-      gate.innerHTML = '<div class="form-msg error show">Please sign in to view this purchase conversation.</div><a href="auth.html" class="btn btn-primary btn-block" style="margin-top:10px;">Sign In</a>';
+  async function bootExisting(id, token) {
+    gate.innerHTML = '<div class="form-msg show" style="display:block;">Loading order...</div>';
+    const res = await RC.getPurchase(id, token);
+    if (!res.ok) {
+      if (RC.isAdminSession()) {
+        // retry implicitly happens via admin header in RC.api; if still failing, surface error
+      }
+      gate.innerHTML = `<div class="form-msg error show">${res.error}</div>`;
       formSection.style.display = 'none';
       return;
     }
-    bootExisting(existingId);
+    gate.style.display = 'none';
+    formSection.style.display = 'none';
+    renderPlanSummary(res.order.plan);
+    renderChat(res.order, token);
+    wireChatForm(id, token);
+  }
+
+  if (existingId) {
+    const effectiveToken = urlToken || (RC.getMyPurchaseRefs().find(r => r.id === existingId) || {}).token || null;
+    bootExisting(existingId, effectiveToken);
     return;
   }
 
-  // New purchase flow — plan details arrive via query params from plans.html
+  // New purchase flow
   const plan = {
     category: params.get('category') || 'Range Cloud Hosting',
     planName: params.get('plan') || 'Custom Plan',
@@ -1155,23 +1146,19 @@ const RC = (function core() {
     location: params.get('location') || ''
   };
   renderPlanSummary(plan);
-
-  if (!user) {
-    gate.style.display = 'block';
-    gate.innerHTML = '<div class="form-msg error show">Please sign in to continue with this purchase.</div><a href="auth.html#signup" class="btn btn-primary btn-block" style="margin-top:10px;">Sign In / Sign Up</a>';
-    formSection.style.display = 'none';
-    return;
-  }
-
   gate.style.display = 'none';
   formSection.style.display = 'block';
 
+  const user = RC.currentUser();
   const purchaseForm = document.getElementById('purchaseForm');
   const discordInput = document.getElementById('purchaseDiscord');
+  const emailInput = document.getElementById('purchaseEmail');
   const notesInput = document.getElementById('purchaseNotes');
   const purchaseMsg = document.getElementById('purchaseFormMsg');
 
-  purchaseForm.addEventListener('submit', (e) => {
+  if (user && emailInput && !emailInput.value) emailInput.value = user.email;
+
+  purchaseForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     purchaseMsg.classList.remove('success', 'error');
 
@@ -1180,8 +1167,24 @@ const RC = (function core() {
       purchaseMsg.classList.add('error', 'show');
       return;
     }
+    if (!RC.emailValid(emailInput.value)) {
+      purchaseMsg.textContent = 'Enter a valid email address.';
+      purchaseMsg.classList.add('error', 'show');
+      return;
+    }
 
-    const res = RC.submitPurchase({ discordTag: discordInput.value, notes: notesInput.value, plan });
+    const submitBtn = purchaseForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+    const res = await RC.createPurchase({
+      discordTag: discordInput.value,
+      email: emailInput.value,
+      notes: notesInput.value,
+      plan
+    });
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Order Request';
+
     if (!res.ok) {
       purchaseMsg.textContent = res.error;
       purchaseMsg.classList.add('error', 'show');
@@ -1189,8 +1192,24 @@ const RC = (function core() {
     }
 
     formSection.style.display = 'none';
-    renderChat(res.order);
-    wireChatForm(res.order.id);
-    history.replaceState(null, '', 'purchase.html?id=' + encodeURIComponent(res.order.id));
+    const trackingUrl = `${location.origin}${location.pathname}?id=${encodeURIComponent(res.id)}&token=${encodeURIComponent(res.token)}`;
+    if (linkBox) {
+      linkBox.style.display = 'block';
+      linkBox.innerHTML = `
+        <div class="field-hint" style="margin-bottom:8px;">Save this link — it's the only way to reopen this conversation from another device or browser:</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" readonly value="${trackingUrl}" id="trackingLinkInput" style="flex:1;padding:10px 12px;background:var(--panel-2);border:1px solid var(--card-border);border-radius:var(--radius-sm);color:var(--text);font-size:0.8rem;font-family:var(--font-mono);">
+          <button class="btn btn-ghost btn-sm" id="copyTrackingLink">Copy</button>
+        </div>
+      `;
+      document.getElementById('copyTrackingLink').addEventListener('click', () => {
+        const input = document.getElementById('trackingLinkInput');
+        input.select();
+        navigator.clipboard?.writeText(input.value);
+      });
+    }
+    renderChat(res.order, res.token);
+    wireChatForm(res.id, res.token);
+    history.replaceState(null, '', `purchase.html?id=${encodeURIComponent(res.id)}&token=${encodeURIComponent(res.token)}`);
   });
 })();
