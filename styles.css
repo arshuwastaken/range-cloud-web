@@ -1392,3 +1392,37 @@ input, textarea, select { font-family: inherit; }
   .chat-bubble { max-width: 92%; }
   .chat-form { flex-direction: column; }
 }
+
+/* ---------- Staff login (inline, inside widget/queues) ---------- */
+.staff-login {
+  padding: 4px 2px 8px;
+}
+.staff-login h5 { margin-bottom: 4px; }
+
+/* ---------- Ticket / purchase action rows ---------- */
+.ticket-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ---------- Chat action row (claim / cancel / delete) ---------- */
+.chat-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 22px 14px;
+}
+.chat-actions:empty { display: none; }
+
+/* ---------- Tracking link box ---------- */
+.tracking-link-box {
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid rgba(0, 224, 255, 0.35);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
