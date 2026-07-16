@@ -1,0 +1,19 @@
+name = "rangecloud-api"
+main = "worker.js"
+compatibility_date = "2026-07-01"
+
+# Created by: wrangler kv namespace create RC_KV
+# Paste the returned id below.
+kv_namespaces = [
+  { binding = "RC_KV", id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID" }
+]
+
+[vars]
+# Restrict this to your real site origin once deployed, e.g.
+# "https://range-cloud-web.pages.dev" or "https://yourdomain.com".
+# "*" works while testing but allows any site to call your API.
+ALLOWED_ORIGIN = "*"
+
+# Secrets (never put these here — set them with wrangler instead):
+#   wrangler secret put ADMIN_PASSWORD
+#   wrangler secret put ADMIN_JWT_SECRET
