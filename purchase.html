@@ -118,7 +118,7 @@
 
     <div class="purchase-form-card" id="purchaseFormSection">
       <h3>Almost there</h3>
-      <p class="sub">We use your Discord username to reach you quickly if this chat goes quiet — no payment is collected on this page.</p>
+      <p class="sub">We'll use these to reach you about setup — no payment is collected on this page.</p>
 
       <div class="form-msg" id="purchaseFormMsg"></div>
 
@@ -126,7 +126,12 @@
         <div class="field">
           <label for="purchaseDiscord">Discord username</label>
           <input type="text" id="purchaseDiscord" placeholder="yourname or yourname#1234" required>
-          <div class="field-hint">We'll use this to follow up if needed. Your account username is used to identify this order.</div>
+          <div class="field-hint">We'll reach out here first once your order is claimed.</div>
+        </div>
+        <div class="field">
+          <label for="purchaseEmail">Email address</label>
+          <input type="email" id="purchaseEmail" placeholder="you@example.com" required>
+          <div class="field-hint">Used as a backup contact and to help you recover this order's chat link.</div>
         </div>
         <div class="field">
           <label for="purchaseNotes">Anything we should know? (optional)</label>
@@ -136,18 +141,21 @@
       </form>
     </div>
 
+    <div class="tracking-link-box" id="trackingLinkBox" style="display:none;"></div>
+
     <div class="chat-card" id="purchaseChatSection" style="display:none;">
       <div class="chat-card-head">
         <h3>Order conversation</h3>
         <span class="role-badge user tag" id="chatOrderStatus">pending</span>
       </div>
       <div class="chat-thread" id="chatThread"></div>
+      <div class="chat-actions" id="chatActions"></div>
       <form class="chat-form" id="chatForm">
         <input type="text" id="chatInput" placeholder="Type a message..." maxlength="1000" required>
         <button type="submit" class="btn btn-primary btn-sm">Send</button>
       </form>
       <div class="form-msg" id="chatFormMsg"></div>
-      <div class="chat-note">This conversation is saved in this browser only. If you switch devices or browsers, sign in and open this order from your dashboard — messages sent from a different device by our team will only appear there once we reply from a connected system.</div>
+      <div class="chat-note">This order now lives on our server, so our team can reply from a different device than the one you used to order — reachable any time via your saved link or the email/Discord you provided.</div>
     </div>
 
   </div>
